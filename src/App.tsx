@@ -1,21 +1,9 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { RouterProvider } from 'react-router-dom';
+import { router } from './routes'; // 先ほど作成した routes/index.tsx をインポート
 
-const App: React.FC = () => {
+const App = () => {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        textAlign: 'center'
-      }}
-    >
-      <Typography variant="h1">
-        Linkus-MAP
-      </Typography>
-    </Box>
+    <RouterProvider router={router} />
   );
 };
 
