@@ -13,7 +13,7 @@ const App: React.FC = () => {
       }}
     >
       <Typography variant="h1">
-        linkus-map
+        Linkus-MAP
       </Typography>
     </Box>
   );
