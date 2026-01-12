@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, Link, Alert } from '@mui/material';
+import { Box, Button, TextField, Typography, Link, Alert, Stack, useTheme } from '@mui/material';
 import { supabase } from '../../lib/supabase/client'; // Supabaseクライアントをインポート
 
 // フォームのモードを定義
 type AuthMode = 'login' | 'signup' | 'passwordReset';
 
 const AuthForm: React.FC = () => {
+  const theme = useTheme();
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -67,12 +68,19 @@ const AuthForm: React.FC = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 400, mx: 'auto', mt: 8, p: 3, boxShadow: 3, borderRadius: 2 }}>
+    <Box sx={{ 
+      maxWidth: theme.spacing(50), 
+      mx: 'auto', 
+      mt: theme.spacing(8), 
+      p: theme.spacing(3), 
+      boxShadow: 3, 
+      borderRadius: theme.spacing(2) 
+    }}>
       <Typography variant="h4" component="h1" gutterBottom align="center">
         {titles[mode]}
       </Typography>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {message && <Alert severity="success" sx={{ mb: 2 }}>{message}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: theme.spacing(2) }}>{error}</Alert>}
+      {message && <Alert severity="success" sx={{ mb: theme.spacing(2) }}>{message}</Alert>}
 
       <Box 
         component="form" 
@@ -89,7 +97,7 @@ const AuthForm: React.FC = () => {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          sx={{ mb: 2 }}
+          sx={{ mb: theme.spacing(2) }}
         />
         {mode !== 'passwordReset' && (
           <TextField
@@ -99,7 +107,7 @@ const AuthForm: React.FC = () => {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            sx={{ mb: 2 }}
+            sx={{ mb: theme.spacing(2) }}
           />
         )}
         {mode === 'signup' && (
@@ -110,35 +118,76 @@ const AuthForm: React.FC = () => {
             required
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
-            sx={{ mb: 2 }}
+            sx={{ mb: theme.spacing(2) }}
           />
         )}
-        <Button type="submit" variant="contained" fullWidth disabled={loading} sx={{ mb: 2 }}>
-          {loading ? '処理中...' : titles[mode]}
-        </Button>
+        <Stack spacing={theme.spacing(2)}>
+          <Button type="submit" variant="contained" fullWidth disabled={loading}>
+            {loading ? '処理中...' : titles[mode]}
+          </Button>
+          
+          {mode === 'login' && (
+            <>
+              <Link 
+                component="button" 
+                variant="body2" 
+                onClick={() => setMode('passwordReset')}
+                sx={{ 
+                  textAlign: 'center',
+                  display: 'block',
+                  textDecoration: 'none',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                  },
+                }}
+              >
+                パスワードを忘れた方はこちら
+              </Link>
+            </>
+          )}
+        </Stack>
       </Box>
 
-      <Box textAlign="center">
+      <Box textAlign="center" sx={{ mt: theme.spacing(3) }}>
         {mode === 'login' && (
-          <>
-            <Link component="button" variant="body2" onClick={() => setMode('signup')}>
-              アカウントをお持ちでないですか？ 新規作成
-            </Link>
-            <br />
-            <Link component="button" variant="body2" onClick={() => setMode('passwordReset')}>
-              パスワードを忘れましたか？
-            </Link>
-          </>
+          <Button
+            variant="outlined"
+            fullWidth
+            onClick={() => setMode('signup')}
+            sx={{ textTransform: 'none' }}
+          >
+            アカウントの作成
+          </Button>
         )}
         {mode === 'signup' && (
-            <Link component="button" variant="body2" onClick={() => setMode('login')}>
-                すでにアカウントをお持ちですか？ ログイン
-            </Link>
+          <Link 
+            component="button" 
+            variant="body2" 
+            onClick={() => setMode('login')}
+            sx={{
+              textDecoration: 'none',
+              '&:hover': {
+                textDecoration: 'underline',
+              },
+            }}
+          >
+            すでにアカウントをお持ちですか？ ログイン
+          </Link>
         )}
         {mode === 'passwordReset' && (
-            <Link component="button" variant="body2" onClick={() => setMode('login')}>
-                ログインページに戻る
-            </Link>
+          <Link 
+            component="button" 
+            variant="body2" 
+            onClick={() => setMode('login')}
+            sx={{
+              textDecoration: 'none',
+              '&:hover': {
+                textDecoration: 'underline',
+              },
+            }}
+          >
+            ログインページに戻る
+          </Link>
         )}
       </Box>
     </Box>
