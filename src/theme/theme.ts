@@ -40,8 +40,70 @@ const theme = createTheme({
       },
     },
   },
+  shape: {
+    borderRadius: 12,
+  },
   typography: {
     fontFamily: 'system-ui, Avenir, Helvetica, Arial, sans-serif',
+  },
+  components: {
+    // メイン実行ボタン / サブボタンの共通スタイル
+    MuiButton: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          textTransform: 'none',
+          borderRadius: theme.shape.borderRadius,
+          fontWeight: 600,
+        }),
+        containedPrimary: ({ theme }) => ({
+          paddingInline: theme.spacing(3),
+          paddingBlock: theme.spacing(1.5),
+        }),
+        outlinedPrimary: ({ theme }) => ({
+          paddingInline: theme.spacing(3),
+          paddingBlock: theme.spacing(1.25),
+        }),
+      },
+    },
+    // 入力フィールドの共通スタイル
+    MuiTextField: {
+      defaultProps: {
+        variant: 'outlined',
+        fullWidth: true,
+      },
+      styleOverrides: {
+        root: ({ theme }) => ({
+          '& .MuiOutlinedInput-root': {
+            borderRadius: theme.shape.borderRadius,
+          },
+        }),
+      },
+    },
+    // カード / コンテナ風のPaper
+    MuiPaper: {
+      styleOverrides: {
+        elevation0: {
+          // elevation={0} のときはカード的な少し大きめの角丸にする
+          borderRadius: 18,
+        },
+      },
+    },
+    // ダイアログの共通スタイル
+    MuiDialog: {
+      styleOverrides: {
+        paper: ({ theme }) => ({
+          borderRadius: theme.shape.borderRadius,
+        }),
+      },
+    },
+    // DialogTitle の強調
+    MuiDialogTitle: {
+      styleOverrides: {
+        root: {
+          fontWeight: 700,
+        },
+      },
+    },
   },
 });
 

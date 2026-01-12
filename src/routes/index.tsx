@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import LandingPage from '../pages/LandingPage';
-import AuthTestPage from '../pages/test/AuthTestPage'; // テストページをインポート
+import TestDashboard from '../pages/TestDashboard';
 
 export const router = createBrowserRouter([
   {
@@ -15,7 +15,7 @@ export const router = createBrowserRouter([
   {
     // テスト用ルート
     path: '/test',
-    element: <AuthTestPage />,
+    element: <TestDashboard />,
   },
   {
     // 未定義のパスはトップへリダイレクト

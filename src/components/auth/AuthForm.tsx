@@ -102,14 +102,16 @@ const AuthForm: React.FC = () => {
   };
 
   return (
-    <Box sx={{ 
-      maxWidth: theme.spacing(50), 
-      mx: 'auto', 
-      mt: theme.spacing(8), 
-      p: theme.spacing(3), 
-      boxShadow: 3, 
-      borderRadius: theme.spacing(2) 
-    }}>
+    <Box
+      sx={{
+        maxWidth: theme.spacing(50),
+        mx: 'auto',
+        mt: 8,
+        p: 3,
+        boxShadow: 3,
+        borderRadius: theme.shape.borderRadius,
+      }}
+    >
       <Typography variant="h4" component="h1" gutterBottom align="center">
         {titles[mode]}
       </Typography>
@@ -146,8 +148,8 @@ const AuthForm: React.FC = () => {
         </Alert>
       )}
 
-      <Box 
-        component="form" 
+      <Box
+        component="form"
         onSubmit={
             mode === 'login' ? handleLogin :
             mode === 'signup' ? handleSignUpSubmit :
@@ -161,7 +163,7 @@ const AuthForm: React.FC = () => {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          sx={{ mb: theme.spacing(2) }}
+          sx={{ mb: 2 }}
         />
         {mode !== 'passwordReset' && (
           <TextField
@@ -171,7 +173,7 @@ const AuthForm: React.FC = () => {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            sx={{ mb: theme.spacing(2) }}
+            sx={{ mb: 2 }}
           />
         )}
         {mode === 'signup' && (
@@ -182,10 +184,10 @@ const AuthForm: React.FC = () => {
             required
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
-            sx={{ mb: theme.spacing(2) }}
+            sx={{ mb: 2 }}
           />
         )}
-        <Stack spacing={theme.spacing(2)}>
+        <Stack spacing={2}>
           <Button 
             type="submit" 
             variant="contained" 
@@ -226,13 +228,12 @@ const AuthForm: React.FC = () => {
         </Stack>
       </Box>
 
-      <Box textAlign="center" sx={{ mt: theme.spacing(3) }}>
+      <Box textAlign="center" sx={{ mt: 3 }}>
         {mode === 'login' && (
           <Button
             variant="outlined"
             fullWidth
             onClick={() => setMode('signup')}
-            sx={{ textTransform: 'none' }}
           >
             アカウントの作成
           </Button>
