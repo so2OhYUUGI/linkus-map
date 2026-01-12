@@ -1,15 +1,13 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 
-const TopPage = () => {
+const TopPage: React.FC = () => {
   return (
-    <div>
-      <h1>links MAP</h1>
-      <p>物語の相関図を、動的に構築しよう。</p>
-      <nav>
-        <Link to="/auth/login">ログイン</Link> |{
-        ' '}
-        <Link to="/auth/signup">アカウント作成</Link>
-      </nav>
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <h1>linkus-map</h1>
+      <Link to="/auth">
+        <button>Sign In / Sign Up</button>
+      </Link>
     </div>
   );
 };
