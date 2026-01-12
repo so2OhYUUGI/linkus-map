@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Button, TextField, Typography, Link, Alert, Stack, useTheme } from '@mui/material';
 import { supabase } from '../../lib/supabase/client'; // Supabaseクライアントをインポート
+import { useAuth } from '../../hooks/useAuth';
 
 // フォームのモードを定義
 type AuthMode = 'login' | 'signup' | 'passwordReset';
@@ -11,54 +12,87 @@ const AuthForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  
+  // サインアップ用のカスタムフック
+  const {
+    isLoading: isSignUpLoading,
+    error: signUpError,
+    message: signUpMessage,
+    handleSignUp,
+    clearError: clearSignUpError,
+    clearMessage: clearSignUpMessage,
+  } = useAuth();
+
+  // ログインとパスワードリセット用のローカルステート
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginMessage, setLoginMessage] = useState<string | null>(null);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [passwordResetError, setPasswordResetError] = useState<string | null>(null);
+  const [passwordResetMessage, setPasswordResetMessage] = useState<string | null>(null);
+  const [passwordResetLoading, setPasswordResetLoading] = useState(false);
+
+  // モード変更時にエラーとメッセージをクリア
+  useEffect(() => {
+    clearSignUpError();
+    clearSignUpMessage();
+    setLoginError(null);
+    setLoginMessage(null);
+    setPasswordResetError(null);
+    setPasswordResetMessage(null);
+  }, [mode, clearSignUpError, clearSignUpMessage]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
+    setLoginLoading(true);
+    setLoginError(null);
+    setLoginMessage(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      setError(error.message);
+      // エラーメッセージをユーザーフレンドリーな日本語に変換
+      let errorMessage = error.message;
+      if (error.message.includes('Invalid login credentials')) {
+        errorMessage = 'メールアドレスまたはパスワードが正しくありません。';
+      } else if (error.message.includes('Email not confirmed')) {
+        errorMessage = 'メールアドレスの確認が完了していません。メールボックスを確認してください。';
+      }
+      setLoginError(errorMessage);
     }
-    setLoading(false);
+    setLoginLoading(false);
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== passwordConfirm) {
-      setError('パスワードが一致しません。');
-      return;
+    const success = await handleSignUp(email, password, passwordConfirm);
+    if (success) {
+      // 成功時はログインフォームに切り替え
+      setMode('login');
+      // フォームをリセット
+      setEmail('');
+      setPassword('');
+      setPasswordConfirm('');
     }
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-      setError(error.message);
-    } else {
-      setMessage('確認メールを送信しました。メールボックスを確認してください。');
-      setMode('login'); // ログインフォームに切り替え
-    }
-    setLoading(false);
   };
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setMessage(null);
+    setPasswordResetLoading(true);
+    setPasswordResetError(null);
+    setPasswordResetMessage(null);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/update-password`,
     });
     if (error) {
-      setError(error.message);
+      // エラーメッセージをユーザーフレンドリーな日本語に変換
+      let errorMessage = error.message;
+      if (error.message.includes('rate limit')) {
+        errorMessage = 'リクエストが多すぎます。しばらく待ってから再度お試しください。';
+      }
+      setPasswordResetError(errorMessage);
     } else {
-      setMessage('パスワードリセット用のメールを送信しました。');
+      setPasswordResetMessage('パスワードリセット用のメールを送信しました。');
       setMode('login');
     }
-    setLoading(false);
+    setPasswordResetLoading(false);
   };
 
   const titles = {
@@ -79,14 +113,44 @@ const AuthForm: React.FC = () => {
       <Typography variant="h4" component="h1" gutterBottom align="center">
         {titles[mode]}
       </Typography>
-      {error && <Alert severity="error" sx={{ mb: theme.spacing(2) }}>{error}</Alert>}
-      {message && <Alert severity="success" sx={{ mb: theme.spacing(2) }}>{message}</Alert>}
+      
+      {/* エラーとメッセージの表示 */}
+      {mode === 'signup' && signUpError && (
+        <Alert severity="error" sx={{ mb: theme.spacing(2) }}>
+          {signUpError}
+        </Alert>
+      )}
+      {mode === 'signup' && signUpMessage && (
+        <Alert severity="success" sx={{ mb: theme.spacing(2) }}>
+          {signUpMessage}
+        </Alert>
+      )}
+      {mode === 'login' && loginError && (
+        <Alert severity="error" sx={{ mb: theme.spacing(2) }}>
+          {loginError}
+        </Alert>
+      )}
+      {mode === 'login' && loginMessage && (
+        <Alert severity="success" sx={{ mb: theme.spacing(2) }}>
+          {loginMessage}
+        </Alert>
+      )}
+      {mode === 'passwordReset' && passwordResetError && (
+        <Alert severity="error" sx={{ mb: theme.spacing(2) }}>
+          {passwordResetError}
+        </Alert>
+      )}
+      {mode === 'passwordReset' && passwordResetMessage && (
+        <Alert severity="success" sx={{ mb: theme.spacing(2) }}>
+          {passwordResetMessage}
+        </Alert>
+      )}
 
       <Box 
         component="form" 
         onSubmit={
             mode === 'login' ? handleLogin :
-            mode === 'signup' ? handleSignUp :
+            mode === 'signup' ? handleSignUpSubmit :
             handlePasswordReset
         }
       >
@@ -122,8 +186,22 @@ const AuthForm: React.FC = () => {
           />
         )}
         <Stack spacing={theme.spacing(2)}>
-          <Button type="submit" variant="contained" fullWidth disabled={loading}>
-            {loading ? '処理中...' : titles[mode]}
+          <Button 
+            type="submit" 
+            variant="contained" 
+            fullWidth 
+            disabled={
+              mode === 'signup' ? isSignUpLoading :
+              mode === 'login' ? loginLoading :
+              passwordResetLoading
+            }
+          >
+            {mode === 'signup' && isSignUpLoading && '処理中...'}
+            {mode === 'signup' && !isSignUpLoading && titles[mode]}
+            {mode === 'login' && loginLoading && '処理中...'}
+            {mode === 'login' && !loginLoading && titles[mode]}
+            {mode === 'passwordReset' && passwordResetLoading && '処理中...'}
+            {mode === 'passwordReset' && !passwordResetLoading && titles[mode]}
           </Button>
           
           {mode === 'login' && (
