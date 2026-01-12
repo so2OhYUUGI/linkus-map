@@ -1,48 +1,47 @@
 import { createTheme } from '@mui/material/styles';
 
-// --- Color Palette ---
-const primaryColor = '#6366f1'; // Indigo: 知性と繋がり
-const secondaryColor = '#f59e0b'; // Amber: ひらめきとアクセント
-const darkBackgroundColor = '#0f172a'; // Deep Navy Blue for Dark Mode
+const primaryColor = '#6366f1';
+const secondaryColor = '#f59e0b';
+const darkBackgroundColor = '#0f172a';
 
-// --- Base Typography ---
-const baseTypography = {
-  fontFamily: 'system-ui, Avenir, Helvetica, Arial, sans-serif',
-};
-
-// --- Light Theme ---
-export const lightTheme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: primaryColor,
+const theme = createTheme({
+  // CSS変数（CSS variables）ベースのテーマを有効化
+  cssVariables: true,
+  colorSchemes: {
+    // ライトモードの設定
+    light: {
+      palette: {
+        primary: {
+          main: primaryColor,
+        },
+        secondary: {
+          main: secondaryColor,
+        },
+      },
     },
-    secondary: {
-      main: secondaryColor,
+    // ダークモードの設定
+    dark: {
+      palette: {
+        primary: {
+          main: primaryColor,
+        },
+        secondary: {
+          main: secondaryColor,
+        },
+        background: {
+          default: darkBackgroundColor,
+          paper: '#1e293b',
+        },
+        text: {
+          primary: 'rgba(255, 255, 255, 0.90)',
+          secondary: 'rgba(255, 255, 255, 0.70)',
+        },
+      },
     },
-    // MUIのデフォルトのライト背景色を使用
   },
-  typography: baseTypography,
+  typography: {
+    fontFamily: 'system-ui, Avenir, Helvetica, Arial, sans-serif',
+  },
 });
 
-// --- Dark Theme ---
-export const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: primaryColor,
-    },
-    secondary: {
-      main: secondaryColor,
-    },
-    background: {
-      default: darkBackgroundColor,
-      paper: '#1e293b', // カードやモーダル用に少し明るい紺色
-    },
-    text: {
-      primary: 'rgba(255, 255, 255, 0.90)',
-      secondary: 'rgba(255, 255, 255, 0.70)',
-    }
-  },
-  typography: baseTypography,
-});
+export default theme;
