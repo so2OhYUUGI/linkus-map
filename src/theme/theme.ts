@@ -1,61 +1,48 @@
 import { createTheme } from '@mui/material/styles';
 
-const theme = createTheme({
+// --- Color Palette ---
+const primaryColor = '#6366f1'; // Indigo: 知性と繋がり
+const secondaryColor = '#f59e0b'; // Amber: ひらめきとアクセント
+const darkBackgroundColor = '#0f172a'; // Deep Navy Blue for Dark Mode
+
+// --- Base Typography ---
+const baseTypography = {
+  fontFamily: 'system-ui, Avenir, Helvetica, Arial, sans-serif',
+};
+
+// --- Light Theme ---
+export const lightTheme = createTheme({
   palette: {
-    mode: 'dark', // 'light' or 'dark'
+    mode: 'light',
     primary: {
-      main: '#646cff',
+      main: primaryColor,
     },
-    background: {
-      default: '#242424',
-      paper: '#1a1a1a',
+    secondary: {
+      main: secondaryColor,
     },
-    text: {
-      primary: 'rgba(255, 255, 255, 0.87)',
-    },
+    // MUIのデフォルトのライト背景色を使用
   },
-  typography: {
-    fontFamily: 'system-ui, Avenir, Helvetica, Arial, sans-serif',
-    h1: {
-      fontSize: '3.2em',
-      lineHeight: 1.1,
-    },
-  },
-  components: {
-    MuiCssBaseline: {
-      styleOverrides: `
-        a {
-          font-weight: 500;
-          color: #646cff;
-          text-decoration: inherit;
-        }
-        a:hover {
-          color: #535bf2;
-        }
-      `,
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: '8px',
-          border: '1px solid transparent',
-          padding: '0.6em 1.2em',
-          fontSize: '1em',
-          fontWeight: 500,
-          fontFamily: 'inherit',
-          backgroundColor: '#1a1a1a',
-          cursor: 'pointer',
-          transition: 'border-color 0.25s',
-          '&:hover': {
-            borderColor: '#646cff',
-          },
-          '&:focus, &:focus-visible': {
-            outline: '4px auto -webkit-focus-ring-color',
-          },
-        },
-      },
-    },
-  },
+  typography: baseTypography,
 });
 
-export default theme;
+// --- Dark Theme ---
+export const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: primaryColor,
+    },
+    secondary: {
+      main: secondaryColor,
+    },
+    background: {
+      default: darkBackgroundColor,
+      paper: '#1e293b', // カードやモーダル用に少し明るい紺色
+    },
+    text: {
+      primary: 'rgba(255, 255, 255, 0.90)',
+      secondary: 'rgba(255, 255, 255, 0.70)',
+    }
+  },
+  typography: baseTypography,
+});
