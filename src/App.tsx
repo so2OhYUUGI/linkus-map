@@ -1,26 +1,45 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { Session } from '@supabase/supabase-js';
+import type { Session } from '@supabase/supabase-js';
 import { supabase } from './lib/supabase/client';
 
-import ReactFlow, { Node, Edge } from 'reactflow';
+import ReactFlow, { type Node, type Edge, type OnNodesChange, type OnEdgesChange, applyNodeChanges, applyEdgeChanges } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import TopPage from './pages/TopPage';
-import AuthPage from './pages/AuthPage';
+import TopPage from './pages/TopPage.tsx';
+import AuthPage from './pages/AuthPage.tsx';
+
 
 // メインのエディタ画面（旧Appコンポーネント）
 const Editor = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
 
+  const onNodesChange: OnNodesChange = (changes) => setNodes((nds) => applyNodeChanges(changes, nds));
+  const onEdgesChange: OnEdgesChange = (changes) => setEdges((eds) => applyEdgeChanges(changes, eds));
+
   useEffect(() => {
-    // ここに、ログイン後にワールドのデータを読み込む処理を実装予定
+    // ログイン後にワールドのデータを読み込む処理を実装予定
+    // 一時的に初期ノードを設定して警告を解消
+    const initialNodes: Node[] = [
+      {
+        id: '1',
+        position: { x: 250, y: 5 },
+        data: { label: 'ようこそ！あなたのWorldへ' },
+      },
+    ];
+    setNodes(initialNodes);
+    setEdges([]); // setEdgesも使用する
   }, []);
 
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-      <ReactFlow nodes={nodes} edges={edges} />
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+      />
       <button onClick={() => supabase.auth.signOut()} style={{ position: 'absolute', top: 10, right: 10 }}>
         ログアウト
       </button>
