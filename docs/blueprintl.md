@@ -29,80 +29,33 @@
 - ユーザーがノード名を編集すれば `entities` を更新する。
 - ユーザーが「詳細メモ」を記述すれば、裏側で「自己参照Connection」を更新または生成する。
 
+### C. フロントエンドアーキテクチャ
+- **ルーティング**: 認証関連のページは `/auth` エンドポイントに集約する（例: `/auth/login`, `/auth/signup`）。これにより、認証フローの管理が容易になる。
+- **コンポーネント設計**: 機能（UIとロジック）を可能な限り小さなコンポーネントに分割して実装する。ページレベルのコンポーネントは、これらのコンポーネントを組み合わせて構成する。これにより、再利用性とメンテナンス性が向上する。
+
 ## 4. セキュリティと共有
 - **マルチテナント**: すべてのデータは `world_id` に紐づき、所有者（owner_id）のみがアクセスできる。
 - **QR共有機能**: `access_tickets` を発行し、特定のトークンを持つゲストにのみ、期間限定で特定ワールドまたはエンティティへの編集権限を付与する。
 
 ## 5. 開発ロードマップ（AIエージェントへの指示）
 
-### フェーズ1：コア機能の実装（最優先）
-1. `docs/schema.sql` に基づくSupabaseのテーブル構築。
-2. Entity作成時に「プロフィール用自己参照Connection」を自動生成するロジックの実装。
-3. React Flowを用いた、ノードの追加と詳細表示（サイドパネル）のプロトタイプ作成。
+### フェーズ1：認証と基本UIの構築（最優先）
+1. Supabase Authを利用した、以下の認証機能および画面の実装：
+   - トップページ（ログイン/サインアップへの導線）
+   - アカウント作成画面
+   - ログイン画面
+   - パスワードリセット機能
+2. `docs/schema.sql` に基づくSupabaseのテーブル構築。（完了済み）
+3. ログイン後、React Flowを用いたグラフエディタの基本画面を表示する。
 
-### フェーズ2：関係性の可視化
-1. 異なるEntity間を線で繋ぎ、Connection（エピソード）を保存する機能。
-2. 包含関係（'box'）の描画サポート。
+### フェーズ2：コア機能の実装
+1. Entity作成時に「プロフィール用自己参照Connection」を自動生成するロジックの実装。
+2. React Flowを用いた、ノードの追加と詳細表示（サイドパネル）のプロトタイプ作成。
+3. 異なるEntity間を線で繋ぎ、Connection（エピソード）を保存する機能。
+4. 包含関係（'box'）の描画サポート。
 
-### フェーズ3：共有とアカウント管理
+### フェーズ3：共有機能
 1. `access_tickets` を用いたゲスト編集機能。
-2. Supabase Authによるログイン・作品管理画面。
 
 ## 6. データベーススキーマ
-
--- 1. 拡張機能の有効化
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- 2. ワールドテーブル（作品のルート）
-CREATE TABLE worlds (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  owner_id uuid NOT NULL, -- auth.users.id
-  title text NOT NULL,
-  description text,
-  created_at timestamptz DEFAULT now()
-);
-
--- 3. エンティティテーブル（点：名前のみ保持）
-CREATE TABLE entities (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  world_id uuid NOT NULL REFERENCES worlds(id) ON DELETE CASCADE,
-  name text NOT NULL,
-  created_at timestamptz DEFAULT now()
-);
-
--- 4. コネクションタグテーブル（線の意味と描画ルール）
-CREATE TABLE connection_tags (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  world_id uuid REFERENCES worlds(id) ON DELETE CASCADE,
-  text text NOT NULL, -- "プロフィール", "宿敵", "親子" など
-  inverse_text text, -- 逆向きの名称
-  graph_type text NOT NULL, -- 'self', 'edge', 'box', 'flow'
-  style_json jsonb,
-  is_system_preset boolean DEFAULT false
-);
-
--- 5. コネクションテーブル（すべての情報のハブ）
-CREATE TABLE connections (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  world_id uuid NOT NULL REFERENCES worlds(id) ON DELETE CASCADE,
-  from_id uuid REFERENCES entities(id) ON DELETE CASCADE,
-  to_id uuid REFERENCES entities(id) ON DELETE CASCADE,
-  tag_id uuid REFERENCES connection_tags(id),
-  content text, -- Markdown形式の詳細メモ
-  context_event_id uuid REFERENCES entities(id), -- 起点となった事件ID
-  created_at timestamptz DEFAULT now()
-);
-
--- 6. アクセスチケット（QRコード共有用）
-CREATE TABLE access_tickets (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  world_id uuid NOT NULL REFERENCES worlds(id) ON DELETE CASCADE,
-  target_entity_id uuid REFERENCES entities(id),
-  token uuid DEFAULT uuid_generate_v4() UNIQUE,
-  expires_at timestamptz NOT NULL,
-  created_at timestamptz DEFAULT now()
-);
-
--- 初期データの投入（プロフィール用タグをあらかじめ作成）
-INSERT INTO connection_tags (text, graph_type, is_system_preset)
-VALUES ('プロフィール', 'self', true);
+docs/schema.sqlを参照のこと。このファイルはデータベース構造の設計図なので、不用意に書き換えないこと。

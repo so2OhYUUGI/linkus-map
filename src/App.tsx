@@ -1,35 +1,79 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Session } from '@supabase/supabase-js';
+import { supabase } from './lib/supabase/client';
 
-function App() {
-  const [count, setCount] = useState(0)
+import ReactFlow, { Node, Edge } from 'reactflow';
+import 'reactflow/dist/style.css';
+
+import TopPage from './pages/TopPage';
+import AuthPage from './pages/AuthPage';
+
+// メインのエディタ画面（旧Appコンポーネント）
+const Editor = () => {
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [edges, setEdges] = useState<Edge[]>([]);
+
+  useEffect(() => {
+    // ここに、ログイン後にワールドのデータを読み込む処理を実装予定
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div style={{ width: '100vw', height: '100vh' }}>
+      <ReactFlow nodes={nodes} edges={edges} />
+      <button onClick={() => supabase.auth.signOut()} style={{ position: 'absolute', top: 10, right: 10 }}>
+        ログアウト
+      </button>
+    </div>
+  );
+};
+
+
+// 認証状態に応じてルーティングを管理するメインコンポーネント
+function App() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // 認証状態の変化を監視
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    // クリーンアップ
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // ログイン状態に基づいてルートを保護するコンポーネント
+  const ProtectedRoute = () => {
+    if (loading) return <div>読み込み中...</div>; // ローディング表示
+    return session ? <Outlet /> : <Navigate to="/" replace />;
+  };
+
+  // 未ログイン状態のユーザー向けのルート
+  const PublicRoute = () => {
+    if (loading) return <div>読み込み中...</div>;
+    // ログイン済みの場合はダッシュボードにリダイレクト
+    return !session ? <Outlet /> : <Navigate to="/dashboard" replace />;
+  };
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* 未ログインユーザー向けルート */}
+        <Route element={<PublicRoute />}>
+          <Route path="/" element={<TopPage />} />
+          <Route path="/auth/*" element={<AuthPage />} />
+        </Route>
+
+        {/* ログインユーザー向けルート */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Editor />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
