@@ -1,10 +1,21 @@
 import React from 'react';
+import { Box, Typography } from '@mui/material';
 
 const App: React.FC = () => {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <h1 style={{ fontSize: '4rem' }}>linkus-map</h1>
-    </div>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        textAlign: 'center'
+      }}
+    >
+      <Typography variant="h1">
+        linkus-map
+      </Typography>
+    </Box>
   );
 };
 
