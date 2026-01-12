@@ -7,7 +7,6 @@ import ReactFlow, { type Node, type Edge, type OnNodesChange, type OnEdgesChange
 import 'reactflow/dist/style.css';
 
 import TopPage from './pages/TopPage.tsx';
-import AuthPage from './pages/AuthPage.tsx';
 
 
 // メインのエディタ画面（旧Appコンポーネント）
@@ -83,7 +82,6 @@ function App() {
         {/* 未ログインユーザー向けルート */}
         <Route element={<PublicRoute />}>
           <Route path="/" element={<TopPage />} />
-          <Route path="/auth/*" element={<AuthPage />} />
         </Route>
 
         {/* ログインユーザー向けルート */}
