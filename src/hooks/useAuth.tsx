@@ -1,6 +1,7 @@
 // src/hooks/useAuth.ts
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import type { AuthError } from '@supabase/supabase-js';
 import { translateAuthError } from '@/utils/authErrors';
 import { validateSignUp } from '@/utils/authValidation';
 
@@ -24,7 +25,7 @@ export const useAuth = (): UseAuthReturn => {
   const clearError = useCallback(() => setError(null), []);
   const clearMessage = useCallback(() => setMessage(null), []);
 
-  const authAction = async (action: () => Promise<{ error: any }>, successMsg?: string): Promise<boolean> => {
+  const authAction = async (action: () => Promise<{ error: AuthError | null }>, successMsg?: string): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
     setMessage(null);
@@ -36,7 +37,7 @@ export const useAuth = (): UseAuthReturn => {
       }
       if (successMsg) setMessage(successMsg);
       return true;
-    } catch (err) {
+    } catch {
       setError('予期しないエラーが発生しました。');
       return false;
     } finally {

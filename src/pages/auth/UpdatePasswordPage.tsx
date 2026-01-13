@@ -46,7 +46,7 @@ const UpdatePasswordPage: React.FC = () => {
 					navigate('/dashboard');
 				}, 3000);
 			}
-		} catch (err) {
+		} catch {
 			setError('予期しないエラーが発生しました。');
 		} finally {
 			setIsLoading(false);

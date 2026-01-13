@@ -29,7 +29,7 @@ export const useWorlds = () => {
         .eq('owner_id', user.id);
       if (error) throw new Error(error.message);
       setWorlds(data || []);
-    } catch (err) {
+    } catch {
       handleError('Failed to fetch worlds');
     } finally {
       setIsLoading(false);
@@ -56,7 +56,7 @@ export const useWorlds = () => {
         throw new Error(error.message);
       }
       return data;
-    } catch (err) {
+    } catch {
       handleError(`Failed to fetch world with id ${id}`);
       return null;
     } finally {
@@ -80,7 +80,7 @@ export const useWorlds = () => {
         return createdWorld;
       }
       return null;
-    } catch (err) {
+    } catch {
       handleError('Failed to create world');
       return null;
     } finally {
@@ -96,7 +96,7 @@ export const useWorlds = () => {
       const { error } = await supabase.from('worlds').delete().eq('id', id);
       if (error) throw new Error(error.message);
       setWorlds((prev) => prev.filter((world) => world.id !== id));
-    } catch (err) {
+    } catch {
       handleError(`Failed to delete world with id ${id}`);
     } finally {
       setIsLoading(false);
@@ -113,4 +113,3 @@ export const useWorlds = () => {
     deleteWorld,
   };
 };
-''
