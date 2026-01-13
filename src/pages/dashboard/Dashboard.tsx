@@ -3,7 +3,6 @@
 // Overview: The main dashboard page where users can view and manage their worlds.
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // 1. useNavigateのインポート
 import {
   Box,
   Stack,
@@ -12,10 +11,6 @@ import {
   useTheme,
   Paper,
   alpha,
-  Card,
-  CardContent,
-  CardActions,
-  IconButton,
   CircularProgress,
   Alert,
   Dialog,
@@ -25,14 +20,13 @@ import {
   DialogActions,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { CreateWorldForm } from '@/components/world';
 import { useWorlds } from '@/hooks/useWorlds';
 import type { World } from '@/types/world';
+import { WorldCard } from '@/components/world/WorldCard'; // 1. WorldCardをインポート
 
 const Dashboard: React.FC = () => {
   const theme = useTheme();
-  const navigate = useNavigate(); // 2. useNavigateフックを使用
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [worldToDelete, setWorldToDelete] = useState<World | null>(null);
 
@@ -52,13 +46,8 @@ const Dashboard: React.FC = () => {
   const handleCreateOpen = () => setCreateOpen(true);
   const handleCreateClose = () => setCreateOpen(false);
 
-  // 3. ワールドカードクリック時の遷移ハンドラ
-  const handleWorldClick = (worldId: string) => {
-    navigate(`/world/${worldId}`);
-  };
-
-  const handleDeleteClick = (e: React.MouseEvent, world: World) => {
-    e.stopPropagation(); // 親要素へのクリックイベント伝播を停止
+  // 2. 削除ハンドラはWorldCardから呼ばれるように
+  const handleDeleteRequest = (world: World) => {
     setWorldToDelete(world);
   };
 
@@ -123,47 +112,14 @@ const Dashboard: React.FC = () => {
     return (
       <Grid container spacing={3}>
         {worlds.map((world) => (
+          // 3. WorldCardコンポーネントを使用
           <Grid size={{ xs: 12, sm: 6, md: 4 }} key={world.id}>
-            <Card
-              sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                cursor: 'pointer', // 4. カーソルをポインターに
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: theme.shadows[8],
-                }
-              }}
-              onClick={() => handleWorldClick(world.id)} // 5. クリックイベントを追加
-            >
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Typography variant="h5" component="h2" gutterBottom>
-                  {world.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {world.description}
-                </Typography>
-              </CardContent>
-              <CardActions sx={{ justifyContent: 'space-between' }}>
-                <Typography variant="caption" color="text.secondary" sx={{ pl: 1 }}>
-                  作成日: {new Date(world.created_at).toLocaleDateString()}
-                </Typography>
-                <IconButton
-                  aria-label="delete"
-                  onClick={(e) => handleDeleteClick(e, world)} // 6. 削除ボタンのイベントハンドラを修正
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </CardActions>
-            </Card>
+            <WorldCard world={world} onDelete={handleDeleteRequest} />
           </Grid>
         ))}
       </Grid>
     );
   };
-
 
   return (
     <>
@@ -208,7 +164,7 @@ const Dashboard: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDeleteCancel}>キャンセル</Button>
-          <Button onClick={handleDeleteConfirm} color="primary" autoFocus>
+          <Button onClick={handleDeleteConfirm} color="error" autoFocus>
             削除
           </Button>
         </DialogActions>
