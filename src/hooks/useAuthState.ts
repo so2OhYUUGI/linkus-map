@@ -1,4 +1,4 @@
-// File Path: src/hooks/useAuth.ts
+// File Path: src/hooks/useAuthState.ts
 // Overview: Provides authentication state and actions.
 
 import { useState, useEffect, useCallback } from 'react';
@@ -11,7 +11,7 @@ export interface UseAuthReturn {
   signInWithGoogle: () => Promise<void>;
 }
 
-export const useAuth = (): UseAuthReturn => {
+export const useAuthState = (): UseAuthReturn => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
