@@ -4,7 +4,7 @@
 
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import LandingPage from '@/pages/LandingPage';
-import TestDashboard from '@/pages/test/TestDashboard';
+import Dashboard from '@/pages/dashboard/Dashboard';
 import UpdatePasswordPage from '@/pages/auth/UpdatePasswordPage';
 import { ProtectedRoute, PublicRoute } from '@/routes';
 
@@ -30,7 +30,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: '/dashboard',
-        element: <TestDashboard />,
+        element: <Dashboard />,
       },
     ],
   },

@@ -21,7 +21,7 @@ export const useWorlds = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const worldAction = useCallback(async <T>(action: () => Promise<{ data: T | null; error: any }>): Promise<T | null> => {
+  const worldAction = useCallback(async <T>(action: () => PromiseLike<{ data: T | null; error: any }>): Promise<T | null> => {
     setIsLoading(true);
     setError(null);
     try {
