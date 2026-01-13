@@ -4,7 +4,7 @@ import LandingPage from '../pages/LandingPage';
 import TestDashboard from '../pages/test/TestDashboard';
 import UpdatePasswordPage from '../pages/auth/UpdatePasswordPage'; // 追加
 import { AuthLayout } from './ProtectedRoute'; // リネーム済みなら適宜書き換えてください
-import { PublicRoute } from './PublicRoute';
+import { PublicRoute } from '@/routes/PublicRoute';
 
 export const router = createBrowserRouter([
   // 【公開ルート】ログイン済みなら基本は入れないが、パスワード更新は許可する

@@ -1,7 +1,14 @@
+// File Path: tsconfig.json
+// File Name: tsconfig.json
+// Overview: TypeScriptコンパイラにパスエイリアスを認識させる設定
 {
   "files": [],
   "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ],
 }
