@@ -2,40 +2,34 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import LandingPage from '../pages/LandingPage';
 import TestDashboard from '../pages/test/TestDashboard';
-import { AuthLayout } from './AuthLayout'; // さっき作ったやつ
-import { Box } from '@mui/material';
+import { AuthLayout } from './ProtectedRoute';
+import { PublicRoute } from './PublicRoute'; // 追加
 
 export const router = createBrowserRouter([
-  // 【公開ルート】誰でもアクセス可能
+  // 【公開・ゲスト限定ルート】ログイン済みなら入れない
   {
-    path: '/',
-    element: <LandingPage />,
+    element: <PublicRoute />,
+    children: [
+      {
+        path: '/',
+        element: <LandingPage />,
+      },
+      // 将来的に /login, /signup を独立させるならここに入れる
+    ],
   },
 
-  // 【保護ルート】ログイン必須エリア
+  // 【保護ルート】ログイン必須
   {
-    element: <AuthLayout />, // 親で認証チェックを一本化
+    element: <AuthLayout />,
     children: [
       {
         path: '/dashboard',
         element: <TestDashboard />,
       },
-      {
-        path: '/settings',
-        element: <Box>設定画面（予定）</Box>,
-      },
-      {
-        path: '/profile',
-        element: <Box>ユーザープロファイル（予定）</Box>,
-      },
-      {
-        path: '/worlds/:id',
-        element: <Box>ワールド詳細画面（予定）</Box>,
-      },
+      // ...他の保護ルート
     ],
   },
 
-  // 未定義のパス
   {
     path: '*',
     element: <Navigate to="/" replace />,

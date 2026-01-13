@@ -1,3 +1,4 @@
+// src/routes/ProtectedRoute.tsx
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthContext';
 import { Box, CircularProgress, Paper, Typography, Stack, Tooltip, IconButton, Avatar, Divider, useTheme, alpha } from '@mui/material';
@@ -10,7 +11,6 @@ import { supabase } from '../lib/supabase/client';
 
 export const AuthLayout = () => {
 	const { user, loading } = useAuthContext();
-	const theme = useTheme();
 
 	if (loading) {
 		return (
