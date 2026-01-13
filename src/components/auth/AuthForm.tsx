@@ -1,3 +1,5 @@
+// src/components/auth/AuthForm.tsx
+
 import React, { useState, useEffect } from 'react';
 import { Box, Button, TextField, Typography, Link, Alert, Stack, useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -53,7 +55,7 @@ const AuthForm: React.FC = () => {
   const onResetSubmit = async () => {
     const success = await handlePasswordReset(email);
     if (success) {
-      setMode('login');
+      setEmail('');      // 入力欄をクリアして、メッセージを見せる
     }
   };
 

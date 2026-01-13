@@ -1,7 +1,7 @@
 // src/routes/ProtectedRoute.tsx
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthContext';
-import { Box, CircularProgress, Paper, Typography, Stack, Tooltip, IconButton, Avatar, Divider, useTheme, alpha } from '@mui/material';
+import { Box, CircularProgress, Paper, Typography, Stack, IconButton, Avatar, Divider } from '@mui/material';
 import GridViewIcon from '@mui/icons-material/GridView';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';

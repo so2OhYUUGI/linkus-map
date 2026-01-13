@@ -2,11 +2,12 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import LandingPage from '../pages/LandingPage';
 import TestDashboard from '../pages/test/TestDashboard';
-import { AuthLayout } from './ProtectedRoute';
-import { PublicRoute } from './PublicRoute'; // 追加
+import UpdatePasswordPage from '../pages/auth/UpdatePasswordPage'; // 追加
+import { AuthLayout } from './ProtectedRoute'; // リネーム済みなら適宜書き換えてください
+import { PublicRoute } from './PublicRoute';
 
 export const router = createBrowserRouter([
-  // 【公開・ゲスト限定ルート】ログイン済みなら入れない
+  // 【公開ルート】ログイン済みなら基本は入れないが、パスワード更新は許可する
   {
     element: <PublicRoute />,
     children: [
@@ -14,11 +15,14 @@ export const router = createBrowserRouter([
         path: '/',
         element: <LandingPage />,
       },
-      // 将来的に /login, /signup を独立させるならここに入れる
+      {
+        path: '/auth/update-password', // 追加
+        element: <UpdatePasswordPage />,
+      },
     ],
   },
 
-  // 【保護ルート】ログイン必須
+  // 【保護ルート】ログイン必須エリア
   {
     element: <AuthLayout />,
     children: [
@@ -26,10 +30,11 @@ export const router = createBrowserRouter([
         path: '/dashboard',
         element: <TestDashboard />,
       },
-      // ...他の保護ルート
+      // 今後ここに /settings や /worlds/:id などを追加していく
     ],
   },
 
+  // 未定義のパスはトップへ
   {
     path: '*',
     element: <Navigate to="/" replace />,
