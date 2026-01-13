@@ -1,35 +1,31 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useWorlds } from '../useWorlds';
-import { supabase } from '@/lib/supabase/client';
-import { useAuth } from '@/hooks'; // モックするためにインポート
+import { useAuth } from '@/hooks';
 
-// Supabase clientのモック
+// 1. Supabase Clientのモックを、より制御しやすく改善
+const mockSelect = vi.fn();
+const mockInsert = vi.fn();
+const mockDelete = vi.fn();
+const mockSingle = vi.fn();
+const mockEq = vi.fn();
+
 vi.mock('@/lib/supabase/client', () => ({
   supabase: {
     from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          single: vi.fn(() => Promise.resolve({})),
-        })),
-      })),
-      insert: vi.fn(() => ({
-        select: vi.fn(() => Promise.resolve({})),
-      })),
-      delete: vi.fn(() => ({
-        eq: vi.fn(() => Promise.resolve({})),
-      })),
+      select: mockSelect,
+      insert: mockInsert,
+      delete: mockDelete,
     })),
   },
 }));
 
-// useAuth hookのモック
-// useWorlds.tsがインポートする'@/hooks'をモックする
+// useAuthフックのモック (変更なし)
 vi.mock('@/hooks', async (importOriginal) => {
     const actual = await importOriginal();
     return {
-      ...(actual as object), // 他のフックはそのまま
-      useAuth: vi.fn(), // useAuthだけをモックに置き換える
+      ...(actual as object),
+      useAuth: vi.fn(),
     };
 });
 
@@ -38,59 +34,78 @@ const mockWorld = { id: '1', title: 'Test World', description: 'A test world', o
 
 describe('useWorlds', () => {
   beforeEach(() => {
+    // すべてのモックをリセット
     vi.clearAllMocks();
-    // モックされたuseAuthの返り値を設定
+    
+    // useAuthのデフォルトの返り値を設定
     (useAuth as vi.Mock).mockReturnValue({ user: mockUser });
+
+    // Supabaseのチェーンメソッドのデフォルトの振る舞いを設定
+    mockSelect.mockReturnValue({ eq: mockEq });
+    mockEq.mockReturnValue({ single: mockSingle });
   });
 
-  it('should create a new world and return it', async () => {
+  it('should create a new world and add it to the state', async () => {
     const newWorldData = { title: 'New World', description: 'A new world description' };
-    const mockInsertSelect = vi.fn().mockResolvedValue({ data: [{ ...mockWorld, ...newWorldData }], error: null });
-    (supabase.from('worlds').insert as vi.Mock).mockReturnValue({
-        select: mockInsertSelect
+    const expectedNewWorld = { ...mockWorld, ...newWorldData };
+    
+    // insertの振る舞いをこのテストケース用に設定
+    mockInsert.mockReturnValue({
+      select: vi.fn().mockResolvedValue({ data: [expectedNewWorld], error: null }),
+    });
+
+    const { result } = renderHook(() => useWorlds());
+
+    // 2. actで非同期関数を実行
+    await waitFor(async () => {
+        const createdWorld = await result.current.createWorld(newWorldData);
+        expect(createdWorld).toEqual(expectedNewWorld);
+    });
+
+    // アサーション
+    expect(mockInsert).toHaveBeenCalledWith([{ ...newWorldData, owner_id: mockUser.id }]);
+    expect(result.current.worlds).toContainEqual(expectedNewWorld);
+    expect(result.current.error).toBeNull();
+  });
+
+  it('should handle error during world creation and set error state', async () => {
+    const newWorldData = { title: 'New World', description: 'A new world description' };
+    
+    // insertがエラーを返す振る舞いを設定
+    mockInsert.mockReturnValue({
+      select: vi.fn().mockResolvedValue({ data: null, error: { message: 'Insert error' } }),
     });
 
     const { result } = renderHook(() => useWorlds());
     
-    let createdWorld;
-    await act(async () => {
-        createdWorld = await result.current.createWorld(newWorldData);
+    // actで実行
+    await waitFor(async () => {
+      const createdWorld = await result.current.createWorld(newWorldData);
+      expect(createdWorld).toBeNull();
     });
 
-    expect(supabase.from('worlds').insert).toHaveBeenCalledWith([{ ...newWorldData, owner_id: mockUser.id }]);
-    expect(result.current.worlds).toContainEqual(expect.objectContaining(newWorldData));
-    expect(createdWorld).toEqual(expect.objectContaining(newWorldData));
-  });
-
-  it('should handle error during world creation', async () => {
-    const newWorldData = { title: 'New World', description: 'A new world description' };
-    (supabase.from('worlds').insert as vi.Mock).mockReturnValue({
-        select: vi.fn().mockResolvedValue({ data: null, error: { message: 'Insert error' } })
+    // 3. waitForでステートの更新を待ってからアサーション
+    await waitFor(() => {
+      expect(result.current.error).toBe('ワールドの操作中に予期しないエラーが発生しました。');
     });
     
-    const { result } = renderHook(() => useWorlds());
-
-    let createdWorld;
-    await act(async () => {
-        createdWorld = await result.current.createWorld(newWorldData);
-    });
-
-    expect(result.current.error).toBe('ワールドの操作中に予期しないエラーが発生しました。');
-    expect(createdWorld).toBeNull();
+    expect(result.current.worlds).toHaveLength(0);
   });
 
-  it('should set isLoading state correctly', async () => {
-    const longRunningPromise = new Promise(() => {}); // 未解決のPromise
-    (supabase.from('worlds').select as vi.Mock).mockReturnValue({
+  it('should set isLoading state correctly during an action', async () => {
+    const longRunningPromise = new Promise(() => {}); // 解決しないPromise
+    mockSelect.mockReturnValue({
         eq: vi.fn().mockReturnValue(longRunningPromise)
     });
 
     const { result } = renderHook(() => useWorlds());
+    
+    // 非同期処理を開始
+    result.current.fetchAllWorlds();
 
-    act(() => {
-      result.current.fetchAllWorlds();
+    // isLoadingがtrueになるのを待つ
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(true);
     });
-
-    expect(result.current.isLoading).toBe(true);
   });
 });
