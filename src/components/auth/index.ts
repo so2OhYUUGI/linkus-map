@@ -2,4 +2,4 @@
 // File Name: index.ts
 // Overview: Re-exports all components from the auth components directory.
 
-export * from './AuthForm';
+export { default as AuthForm } from './AuthForm';
