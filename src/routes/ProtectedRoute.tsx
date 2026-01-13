@@ -41,7 +41,7 @@ export const ProtectedRoute = () => {
         <IconButton sx={{ mb: 2 }}><SettingsIcon /></IconButton>
       </Paper>
 
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* --- 共通トップバー --- */}
         <Box sx={{ height: 64, display: 'flex', alignItems: 'center', px: 4, borderBottom: 1, borderColor: 'divider' }}>
           <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 500 }}>LinkusMap</Typography>

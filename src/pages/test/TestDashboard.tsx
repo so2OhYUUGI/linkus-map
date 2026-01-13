@@ -41,7 +41,7 @@ const TestDashboard: React.FC = () => {
     <>
       <Box
         sx={{
-          minHeight: '100vh',
+          height: '100%', // 親要素の高さいっぱいに広がるように変更
           bgcolor: 'background.default',
           display: 'flex',
           alignItems: 'center',
