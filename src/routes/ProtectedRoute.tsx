@@ -12,10 +12,10 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 
 export const ProtectedRoute = () => {
-  const { user, loading, signOut } = useAuthContext();
+  const { user, isLoading, signOut } = useAuthContext();
 
   // ✅ 修正：初回ロード時（userがまだいない時）のみ全画面ローディングを表示
-  if (loading && !user) {
+  if (isLoading && !user) {
     return (
       <Box sx={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.default' }}>
         <CircularProgress />

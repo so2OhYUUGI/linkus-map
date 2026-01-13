@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { useAuthState } from '../hooks/useAuthState';
-import { useAuthForm } from '../hooks/useAuthForm';
+import { useAuthState } from '@/hooks/useAuthState';
+import { useAuthForm } from '@/hooks/useAuthForm';
 
 // 認証コンテキストが提供する値の型を定義
 interface AuthContextType {

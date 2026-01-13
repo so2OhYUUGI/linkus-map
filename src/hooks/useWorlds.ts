@@ -4,11 +4,11 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthState } from '@/hooks/useAuthState';
 import type { World, NewWorld } from '@/types/world';
 
 export const useWorlds = () => {
-  const { user } = useAuth();
+  const { user } = useAuthState();
   const [worlds, setWorlds] = useState<World[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

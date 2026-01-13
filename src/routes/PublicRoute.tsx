@@ -7,10 +7,10 @@ import { useAuthContext } from '@/contexts';
 import { Box, CircularProgress } from '@mui/material';
 
 export const PublicRoute = () => {
-	const { user, loading } = useAuthContext();
+	const { user, isLoading } = useAuthContext();
 	const location = useLocation();
 
-	if (loading) {
+	if (isLoading) {
 		return (
 			<Box sx={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.default' }}>
 				<CircularProgress />

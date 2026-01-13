@@ -2,8 +2,8 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import type { AuthError } from '@supabase/supabase-js';
-import { translateAuthError } from '../utils/authErrors';
-import { validateSignUp } from '../utils/authValidation';
+import { translateAuthError } from '@/utils/authErrors';
+import { validateSignUp } from '@/utils/authValidation';
 
 interface UseAuthFormReturn {
   isLoading: boolean;

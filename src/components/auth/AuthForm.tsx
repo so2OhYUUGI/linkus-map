@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Box, Button, TextField, Typography, Link, Alert, Stack, useTheme } from '@mui/material';
-import { useAuthForm } from '../../hooks/useAuthForm';
+import { useAuthForm } from '@/hooks/useAuthForm';
 
 type AuthMode = 'login' | 'signup' | 'passwordReset';
 
