@@ -12,21 +12,25 @@ import {
   TextField,
   Box,
 } from '@mui/material';
+import type { NewWorld } from '@/types/world'; // 1. NewWorldをインポート
 
 interface CreateWorldFormProps {
   open: boolean;
   onClose: () => void;
+  onCreate: (data: NewWorld) => Promise<void>; // 2. onCreateの型をNewWorldに修正
 }
 
-export const CreateWorldForm: React.FC<CreateWorldFormProps> = ({ open, onClose }) => {
-  const [worldName, setWorldName] = useState('');
-  const [genre, setGenre] = useState('');
+export const CreateWorldForm: React.FC<CreateWorldFormProps> = ({ open, onClose, onCreate }) => {
+  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock: Just close the dialog on submission
-    onClose();
+    if (!title) return; // Basic validation
+    await onCreate({ title, description });
+    // Reset form for next use
+    setTitle('');
+    setDescription('');
   };
 
   return (
@@ -41,16 +45,11 @@ export const CreateWorldForm: React.FC<CreateWorldFormProps> = ({ open, onClose 
         <DialogContent sx={{ display: 'grid', gap: 2 }}>
           <TextField
             label="ワールド名"
-            value={worldName}
-            onChange={(e) => setWorldName(e.target.value)}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             fullWidth
             required
-          />
-          <TextField
-            label="ジャンル（例: ファンタジー、SF など）"
-            value={genre}
-            onChange={(e) => setGenre(e.target.value)}
-            fullWidth
+            autoFocus
           />
           <TextField
             label="説明"
@@ -62,7 +61,7 @@ export const CreateWorldForm: React.FC<CreateWorldFormProps> = ({ open, onClose 
           />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={onClose} variant="text">
+          <Button onClick={onClose}>
             キャンセル
           </Button>
           <Button

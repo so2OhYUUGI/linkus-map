@@ -25,7 +25,7 @@ export const useAuth = (): UseAuthReturn => {
 
     // 認証状態の変更を監視
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event: AuthChangeEvent, session: Session | null) => {
+      (_event: AuthChangeEvent, session: Session | null) => {
         setUser(session?.user ?? null);
       }
     );

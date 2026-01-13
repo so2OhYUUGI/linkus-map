@@ -3,6 +3,7 @@
 // Overview: The main dashboard page where users can view and manage their worlds.
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // 1. useNavigateのインポート
 import {
   Box,
   Stack,
@@ -23,7 +24,7 @@ import {
   DialogContentText,
   DialogActions,
 } from '@mui/material';
-import Grid from '@mui/material/Grid'; // ★★★ 修正点: Grid2をインポート
+import Grid from '@mui/material/Grid';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { CreateWorldForm } from '@/components/world';
 import { useWorlds } from '@/hooks/useWorlds';
@@ -31,6 +32,7 @@ import type { World } from '@/types/world';
 
 const Dashboard: React.FC = () => {
   const theme = useTheme();
+  const navigate = useNavigate(); // 2. useNavigateフックを使用
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [worldToDelete, setWorldToDelete] = useState<World | null>(null);
 
@@ -50,7 +52,13 @@ const Dashboard: React.FC = () => {
   const handleCreateOpen = () => setCreateOpen(true);
   const handleCreateClose = () => setCreateOpen(false);
 
-  const handleDeleteClick = (world: World) => {
+  // 3. ワールドカードクリック時の遷移ハンドラ
+  const handleWorldClick = (worldId: string) => {
+    navigate(`/world/${worldId}`);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, world: World) => {
+    e.stopPropagation(); // 親要素へのクリックイベント伝播を停止
     setWorldToDelete(world);
   };
 
@@ -113,12 +121,23 @@ const Dashboard: React.FC = () => {
     }
 
     return (
-      // ★★★ 修正点: containerプロパティはGrid2でも有効
       <Grid container spacing={3}>
         {worlds.map((world) => (
-          // ★★★ 修正点: 'item'を削除し、'size'プロパティを使用
           <Grid size={{ xs: 12, sm: 6, md: 4 }} key={world.id}>
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <Card
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                cursor: 'pointer', // 4. カーソルをポインターに
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: theme.shadows[8],
+                }
+              }}
+              onClick={() => handleWorldClick(world.id)} // 5. クリックイベントを追加
+            >
               <CardContent sx={{ flexGrow: 1 }}>
                 <Typography variant="h5" component="h2" gutterBottom>
                   {world.title}
@@ -128,10 +147,13 @@ const Dashboard: React.FC = () => {
                 </Typography>
               </CardContent>
               <CardActions sx={{ justifyContent: 'space-between' }}>
-                 <Typography variant="caption" color="text.secondary" sx={{ pl: 1 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ pl: 1 }}>
                   作成日: {new Date(world.created_at).toLocaleDateString()}
                 </Typography>
-                <IconButton aria-label="delete" onClick={() => handleDeleteClick(world)}>
+                <IconButton
+                  aria-label="delete"
+                  onClick={(e) => handleDeleteClick(e, world)} // 6. 削除ボタンのイベントハンドラを修正
+                >
                   <DeleteIcon />
                 </IconButton>
               </CardActions>
@@ -155,29 +177,21 @@ const Dashboard: React.FC = () => {
         }}
       >
         <Stack spacing={4} sx={{ maxWidth: 1200, mx: 'auto' }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="h3" component="h1" sx={{ fontWeight: 700 }}>
-                    World Dashboard
-                </Typography>
-                <Button variant="contained" size="large" onClick={handleCreateOpen}>
-                    ＋ ワールド新規作成
-                </Button>
-            </Stack>
-            {renderContent()}
+          {renderContent()}
         </Stack>
       </Box>
 
-      <CreateWorldForm 
-        open={isCreateOpen} 
+      <CreateWorldForm
+        open={isCreateOpen}
         onClose={handleCreateClose}
         onCreate={async (data) => {
-            const newWorld = await createWorld(data);
-            if (newWorld) {
-                handleCreateClose();
-            }
+          const newWorld = await createWorld(data);
+          if (newWorld) {
+            handleCreateClose();
+          }
         }}
       />
-      
+
       <Dialog
         open={!!worldToDelete}
         onClose={handleDeleteCancel}

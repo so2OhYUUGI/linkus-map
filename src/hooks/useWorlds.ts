@@ -1,100 +1,110 @@
 // File Path: src/hooks/useWorlds.ts
 // File Name: useWorlds.ts
-// Overview: Provides a set of hooks for interacting with the 'worlds' table in Supabase, including fetching, creating, and deleting worlds.
+// Overview: Hook for managing worlds data, including fetching, creating, and deleting worlds.
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import type { World } from '@/types/world';
 import { useAuth } from '@/hooks/useAuth';
-
-const translateWorldError = (message: string): string => {
-  if (message.includes('security policy')) {
-    return '指定された操作を行う権限がありません。';
-  }
-  return 'ワールドの操作中に予期しないエラーが発生しました。';
-};
+import type { World, NewWorld } from '@/types/world';
 
 export const useWorlds = () => {
+  const { user } = useAuth();
   const [worlds, setWorlds] = useState<World[]>([]);
-  const [currentWorld, setCurrentWorld] = useState<World | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
 
-  const worldAction = useCallback(async <T>(action: () => PromiseLike<{ data: T | null; error: any }>): Promise<T | null> => {
+  const handleError = (message: string) => {
+    console.error(message);
+    setError('ワールドの操作中に予期しないエラーが発生しました。');
+  };
+
+  const fetchAllWorlds = useCallback(async () => {
+    if (!user) return;
     setIsLoading(true);
     setError(null);
     try {
-      const { data, error: apiError } = await action();
-      if (apiError) {
-        setError(translateWorldError(apiError.message));
-        return null;
+      const { data, error } = await supabase
+        .from('worlds')
+        .select('*')
+        .eq('owner_id', user.id);
+      if (error) throw new Error(error.message);
+      setWorlds(data || []);
+    } catch (err) {
+      handleError('Failed to fetch worlds');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  const fetchWorldById = useCallback(async (id: string): Promise<World | null> => {
+    if (!user) return null;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from('worlds')
+        .select('*')
+        .eq('id', id)
+        .single(); // .single() to get a single record
+
+      if (error) {
+        if (error.code === 'PGRST116') { // PostgREST error for "Not a single row"
+          console.error(`World with id ${id} not found.`);
+          setError('指定されたワールドが見つかりませんでした。');
+          return null;
+        }
+        throw new Error(error.message);
       }
       return data;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '予期しないエラーが発生しました。';
-      setError(translateWorldError(errorMessage));
+      handleError(`Failed to fetch world with id ${id}`);
       return null;
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [user]);
 
-  const fetchAllWorlds = useCallback(async () => {
-    if (!user) return;
-    const data = await worldAction<World[]>(() =>
-      supabase.from('worlds').select('*').eq('owner_id', user.id)
-    );
-    if (data) {
-      setWorlds(data);
-    }
-  }, [user, worldAction]);
-
-  const fetchWorldById = useCallback(async (id: string) => {
-    const data = await worldAction<World>(() =>
-      supabase.from('worlds').select('*').eq('id', id).single()
-    );
-    if (data) {
-      setCurrentWorld(data);
-      return data;
-    }
-    return null;
-  }, [worldAction]);
-
-  const createWorld = useCallback(
-    async (worldData: Pick<World, 'title' | 'description'>) => {
-      if (!user) return null;
-      const data = await worldAction<World[]>(() =>
-        supabase
-          .from('worlds')
-          .insert([{ ...worldData, owner_id: user.id }])
-          .select()
-      );
-      
+  const createWorld = async (newWorld: NewWorld): Promise<World | null> => {
+    if (!user) return null;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from('worlds')
+        .insert([{ ...newWorld, owner_id: user.id }])
+        .select();
+      if (error) throw new Error(error.message);
       if (data && data.length > 0) {
-        const newWorld = data[0];
-        setWorlds((prev) => [...prev, newWorld]);
-        return newWorld;
+        const createdWorld = data[0];
+        setWorlds((prev) => [...prev, createdWorld]);
+        return createdWorld;
       }
       return null;
-    },
-    [user, worldAction]
-  );
-
-  const deleteWorld = useCallback(async (id: string) => {
-    const data = await worldAction<World[]>(() =>
-      supabase.from('worlds').delete().eq('id', id).select()
-    );
-    if (data && data.length > 0) {
-        setWorlds((prev) => prev.filter((w) => w.id !== id));
-        return true;
+    } catch (err) {
+      handleError('Failed to create world');
+      return null;
+    } finally {
+      setIsLoading(false);
     }
-    return false;
-  }, [worldAction]);
+  };
+
+  const deleteWorld = async (id: string) => {
+    if (!user) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { error } = await supabase.from('worlds').delete().eq('id', id);
+      if (error) throw new Error(error.message);
+      setWorlds((prev) => prev.filter((world) => world.id !== id));
+    } catch (err) {
+      handleError(`Failed to delete world with id ${id}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return {
     worlds,
-    currentWorld,
     isLoading,
     error,
     fetchAllWorlds,
@@ -103,3 +113,4 @@ export const useWorlds = () => {
     deleteWorld,
   };
 };
+''
