@@ -23,7 +23,7 @@ import Grid from '@mui/material/Grid';
 import { CreateWorldForm } from '@/components/world';
 import { useWorlds } from '@/hooks/useWorlds';
 import type { World } from '@/types/world';
-import { WorldCard } from '@/components/world/WorldCard'; // 1. WorldCardをインポート
+import { WorldCard } from '@/components/world/WorldCard';
 
 const Dashboard: React.FC = () => {
   const theme = useTheme();
@@ -46,7 +46,6 @@ const Dashboard: React.FC = () => {
   const handleCreateOpen = () => setCreateOpen(true);
   const handleCreateClose = () => setCreateOpen(false);
 
-  // 2. 削除ハンドラはWorldCardから呼ばれるように
   const handleDeleteRequest = (world: World) => {
     setWorldToDelete(world);
   };
@@ -74,6 +73,7 @@ const Dashboard: React.FC = () => {
   )}, transparent 50%)`;
 
   const renderContent = () => {
+    // 1. 初回ロード中（データがまだ一つもない時だけローディングを出す）
     if (isLoading && worlds.length === 0) {
       return (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 10 }}>
@@ -86,7 +86,8 @@ const Dashboard: React.FC = () => {
       return <Alert severity="error">{error}</Alert>;
     }
 
-    if (worlds.length === 0) {
+    // 2. データが空（ロードが終わっていて、かつ本当に0件の時だけ）
+    if (!isLoading && worlds.length === 0) {
       return (
         <Paper elevation={0} sx={{ width: '100%', maxWidth: theme.spacing(80), p: { xs: 4, md: 6 } }}>
           <Stack spacing={3} alignItems="flex-start">
@@ -109,10 +110,10 @@ const Dashboard: React.FC = () => {
       );
     }
 
+    // 3. データがある場合（ロード中であっても、既存のデータがあればこちらを出す）
     return (
       <Grid container spacing={3}>
         {worlds.map((world) => (
-          // 3. WorldCardコンポーネントを使用
           <Grid size={{ xs: 12, sm: 6, md: 4 }} key={world.id}>
             <WorldCard world={world} onDelete={handleDeleteRequest} />
           </Grid>

@@ -12,10 +12,10 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 
 export const ProtectedRoute = () => {
-  // supabaseの直接呼び出しを排除し、コンテキストから全て取得
   const { user, loading, signOut } = useAuthContext();
 
-  if (loading) {
+  // ✅ 修正：初回ロード時（userがまだいない時）のみ全画面ローディングを表示
+  if (loading && !user) {
     return (
       <Box sx={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.default' }}>
         <CircularProgress />
@@ -23,11 +23,15 @@ export const ProtectedRoute = () => {
     );
   }
 
-  if (!user) return <Navigate to="/" replace />;
+  // 認証チェック：ロードが終わっていて、かつuserがいない場合
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
 
   const userEmail = user.email || '';
   const userName = userEmail.split('@')[0];
 
+  // userがいる場合は、ロード中であってもレイアウトを描画し続ける
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* --- 共通サイドバー --- */}
@@ -49,7 +53,6 @@ export const ProtectedRoute = () => {
             <Typography variant="body2" sx={{ fontWeight: 600 }}>{userName}</Typography>
             <Avatar sx={{ bgcolor: 'secondary.main', width: 32, height: 32 }}>{userName[0]?.toUpperCase()}</Avatar>
             <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-            {/* ★ コンテキスト経由でのsignOut呼び出しに変更 */}
             <IconButton size="small" onClick={signOut}><LogoutIcon fontSize="small" /></IconButton>
           </Stack>
         </Box>

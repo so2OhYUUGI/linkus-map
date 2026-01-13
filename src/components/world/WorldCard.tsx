@@ -30,92 +30,109 @@ export const WorldCard: React.FC<WorldCardProps> = ({ world, onDelete }) => {
   const isMenuOpen = Boolean(anchorEl);
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
-    event.stopPropagation();
+    event.stopPropagation(); // Prevent card's onClick
     setAnchorEl(event.currentTarget);
   };
 
-  const handleMenuClose = () => {
+  // Make event optional, as onClose can be triggered by backdrop click or escape key
+  const handleMenuClose = (event?: React.SyntheticEvent | Event) => {
+    event?.stopPropagation(); // Prevent card's onClick
     setAnchorEl(null);
   };
 
-  const handleDelete = () => {
+  const handleDelete = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation(); // Prevent card's onClick
     onDelete(world);
-    handleMenuClose();
+    handleMenuClose(event);
   };
 
   const handleCardClick = () => {
     navigate(`/world/${world.id}`);
   };
 
+  // Combine hover and menu open state to keep the card elevated
+  const showActions = isHovered || isMenuOpen;
+
   return (
-    <Card
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={handleCardClick}
-      sx={{
-        height: '100%',
-        cursor: 'pointer',
-        position: 'relative',
-        transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-        transform: isHovered ? 'translateY(-6px)' : 'translateY(0)',
-        boxShadow: isHovered ? theme.shadows[10] : theme.shadows[3],
-      }}
-    >
-      <IconButton
-        aria-label="settings"
-        onClick={handleMenuClick}
+    // 1. Wrap in Fragment
+    <>
+      <Card
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={handleCardClick}
         sx={{
-          position: 'absolute',
-          top: 8,
-          right: 8,
-          opacity: isHovered ? 1 : 0.4,
-          transition: 'opacity 0.3s ease-in-out',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          '&:hover': {
-            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-          }
+          height: '100%',
+          cursor: 'pointer',
+          position: 'relative',
+          transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+          // 2. Use combined state for hover effect
+          transform: showActions ? 'translateY(-6px)' : 'translateY(0)',
+          boxShadow: showActions ? theme.shadows[10] : theme.shadows[3],
         }}
       >
-        <MoreVertIcon />
-      </IconButton>
-
-      <CardContent sx={{ pt: 5 }}>
-        <Typography variant="h5" component="h2" gutterBottom noWrap>
-          {world.title}
-        </Typography>
-        <Typography
-          variant="body2"
-          color="text.secondary"
+        <IconButton
+          aria-label="settings"
+          onClick={handleMenuClick}
           sx={{
-            height: '4.5em', // 3 lines of text
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            // 2. Use combined state for opacity
+            opacity: showActions ? 1 : 0.4,
+            transition: 'opacity 0.3s ease-in-out',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            },
           }}
         >
-          {world.description}
-        </Typography>
-      </CardContent>
+          <MoreVertIcon />
+        </IconButton>
 
-      <Box sx={{ flexGrow: 1 }} />
+        <CardContent sx={{ pt: 5 }}>
+          <Typography variant="h5" component="h2" gutterBottom noWrap>
+            {world.title}
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              height: '4.5em', // 3 lines of text
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+            }}
+          >
+            {world.description}
+          </Typography>
+        </CardContent>
 
-      <Box sx={{ p: 2, pt: 0 }}>
-        <Typography variant="caption" color="text.secondary">
-          作成日: {new Date(world.created_at).toLocaleDateString()}
-        </Typography>
-      </Box>
+        <Box sx={{ flexGrow: 1 }} />
 
+        <Box sx={{ p: 2, pt: 0 }}>
+          <Typography variant="caption" color="text.secondary">
+            作成日: {new Date(world.created_at).toLocaleDateString()}
+          </Typography>
+        </Box>
+      </Card>
+
+      {/* 1. Menu moved outside the Card */}
       <Menu
         anchorEl={anchorEl}
         open={isMenuOpen}
         onClose={handleMenuClose}
+        // 3. Stop propagation on the menu itself to prevent card click
+        onClick={(e) => e.stopPropagation()}
+        MenuListProps={{
+          'aria-labelledby': 'world-card-menu-button',
+        }}
       >
         <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
           削除
         </MenuItem>
       </Menu>
-    </Card>
+    </>
   );
 };
