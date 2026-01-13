@@ -1,3 +1,5 @@
+// src/App.tsx
+
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes';
 import { AuthProvider } from './contexts/AuthContext'; // 追加
