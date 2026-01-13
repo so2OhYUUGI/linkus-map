@@ -1,4 +1,8 @@
-import { renderHook, waitFor } from '@testing-library/react';
+// File Path: src/hooks/__tests__/useWorlds.test.ts
+// File Name: useWorlds.test.ts
+// Overview: Test suite for the useWorlds hook.
+
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, type Mock } from 'vitest';
 import { useWorlds } from '../useWorlds';
 import { useAuth } from '@/hooks/useAuth';
@@ -32,7 +36,7 @@ describe('useWorlds', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     
-    // useAuthの返り値を設定
+    // 修正点1: useAuthのモックを現在の仕様に合わせる
     (useAuth as Mock).mockReturnValue({ 
       user: mockUser,
       signOut: vi.fn(),
@@ -54,13 +58,18 @@ describe('useWorlds', () => {
 
     const { result } = renderHook(() => useWorlds());
 
-    await waitFor(async () => {
-        const createdWorld = await result.current.createWorld(newWorldData);
-        expect(createdWorld).toEqual(expectedNewWorld);
+    // 修正点3: actで非同期処理をラップ
+    await act(async () => {
+      const createdWorld = await result.current.createWorld(newWorldData);
+      expect(createdWorld).toEqual(expectedNewWorld);
+    });
+
+    // 修正点2: waitForでstateの更新を待機
+    await waitFor(() => {
+      expect(result.current.worlds).toContainEqual(expectedNewWorld);
     });
 
     expect(mockInsert).toHaveBeenCalledWith([{ ...newWorldData, owner_id: mockUser.id }]);
-    expect(result.current.worlds).toContainEqual(expectedNewWorld);
     expect(result.current.error).toBeNull();
   });
 
@@ -73,11 +82,13 @@ describe('useWorlds', () => {
 
     const { result } = renderHook(() => useWorlds());
     
-    await waitFor(async () => {
+    // actで非同期処理をラップ
+    await act(async () => {
       const createdWorld = await result.current.createWorld(newWorldData);
       expect(createdWorld).toBeNull();
     });
 
+    // waitForでエラーstateの更新を待機
     await waitFor(() => {
       expect(result.current.error).toBe('ワールドの操作中に予期しないエラーが発生しました。');
     });
@@ -93,8 +104,12 @@ describe('useWorlds', () => {
 
     const { result } = renderHook(() => useWorlds());
     
-    result.current.fetchAllWorlds();
+    // 同期的なステート更新もactでラップ
+    act(() => {
+      result.current.fetchAllWorlds();
+    });
 
+    // isLoadingがtrueになるのを待機
     await waitFor(() => {
       expect(result.current.isLoading).toBe(true);
     });
