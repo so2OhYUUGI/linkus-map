@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import LandingPage from '../pages/LandingPage';
-import TestDashboard from '../pages/TestDashboard';
+import TestDashboard from '../pages/test/TestDashboard';
 
 export const router = createBrowserRouter([
   {
