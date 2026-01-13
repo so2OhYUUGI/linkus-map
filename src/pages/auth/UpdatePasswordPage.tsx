@@ -1,8 +1,12 @@
+// File Path: src/pages/auth/UpdatePasswordPage.tsx
+// File Name: UpdatePasswordPage.tsx
+// Overview: A page for users to update their password.
+
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Alert, Stack, Paper, useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase/client';
-import { translateAuthError } from '../../utils/authErrors';
+import { supabase } from '@/lib/supabase/client';
+import { translateAuthError } from '@/utils/authErrors';
 
 const UpdatePasswordPage: React.FC = () => {
 	const theme = useTheme();

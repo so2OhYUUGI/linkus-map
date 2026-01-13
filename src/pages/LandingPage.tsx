@@ -1,4 +1,7 @@
-import React from 'react';
+// File Path: src/pages/LandingPage.tsx
+// File Name: LandingPage.tsx
+// Overview: The main landing page of the application, featuring a brand section and a login/signup form.
+
 import {
   Box,
   Typography,
@@ -6,8 +9,8 @@ import {
   useTheme,
 } from '@mui/material';
 import { Network } from 'lucide-react';
-import AuthForm from '../components/auth/AuthForm';
-import { createBrandAreaStyles, createTitleGradientStyles } from '../theme/theme';
+import { AuthForm } from '@/components/auth';
+import { createBrandAreaStyles, createTitleGradientStyles } from '@/theme/theme';
 
 const LandingPage: React.FC = () => {
   const theme = useTheme();
@@ -20,7 +23,7 @@ const LandingPage: React.FC = () => {
         width: '100%',
       }}
     >
-      {/* 左側：ブランドエリア（60%） */}
+      {/* Left side: Brand area (60%) */}
       <Box
         sx={createBrandAreaStyles(theme)}
       >
@@ -66,7 +69,7 @@ const LandingPage: React.FC = () => {
         </Stack>
       </Box>
 
-      {/* 右側：ログインエリア（40%） */}
+      {/* Right side: Login area (40%) */}
       <Box
         sx={{
           width: { xs: '100%', md: '40%' },

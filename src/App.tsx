@@ -1,8 +1,10 @@
-// src/App.tsx
+// File Path: src/App.tsx
+// File Name: App.tsx
+// Overview: Root application component.
 
 import { RouterProvider } from 'react-router-dom';
-import { router } from './routes';
-import { AuthProvider } from './contexts/AuthContext'; // 追加
+import { router } from '@/routes';
+import { AuthProvider } from '@/contexts';
 
 const App = () => {
   return (

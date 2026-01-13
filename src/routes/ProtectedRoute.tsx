@@ -1,15 +1,18 @@
-// src/routes/ProtectedRoute.tsx
+// File Path: src/routes/ProtectedRoute.tsx
+// File Name: ProtectedRoute.tsx
+// Overview: Defines the layout for authenticated users, including a sidebar and top bar, and handles the loading and authentication state.
+
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuthContext } from '../contexts/AuthContext';
+import { useAuthContext } from '@/contexts';
+import { supabase } from '@/lib/supabase/client';
 import { Box, CircularProgress, Paper, Typography, Stack, IconButton, Avatar, Divider } from '@mui/material';
 import GridViewIcon from '@mui/icons-material/GridView';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { supabase } from '../lib/supabase/client';
 
-export const AuthLayout = () => {
+export const ProtectedRoute = () => { // Renamed from AuthLayout to ProtectedRoute
 	const { user, loading } = useAuthContext();
 
 	if (loading) {
@@ -44,7 +47,7 @@ export const AuthLayout = () => {
 					<Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 500 }}>LinkusMap</Typography>
 					<Stack direction="row" spacing={2} alignItems="center">
 						<Typography variant="body2" sx={{ fontWeight: 600 }}>{userName}</Typography>
-						<Avatar sx={{ bgcolor: 'secondary.main', width: 32, height: 32 }}>{userName[0]?.toUpperCase()}</Avatar>
+					<Avatar sx={{ bgcolor: 'secondary.main', width: 32, height: 32 }}>{userName[0]?.toUpperCase()}</Avatar>
 						<Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
 						<IconButton size="small" onClick={() => supabase.auth.signOut()}><LogoutIcon fontSize="small" /></IconButton>
 					</Stack>
