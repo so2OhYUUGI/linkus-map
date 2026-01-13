@@ -1,7 +1,11 @@
+// File Path: src/hooks/useWorlds.ts
+// File Name: useWorlds.ts
+// Overview: Provides a set of hooks for interacting with the 'worlds' table in Supabase, including fetching, creating, and deleting worlds.
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { World } from '@/types/world';
-import { useAuth } from '@/hooks';
+import type { World } from '@/types/world';
+import { useAuth } from '@/hooks/useAuth';
 
 const translateWorldError = (message: string): string => {
   if (message.includes('security policy')) {
@@ -28,7 +32,8 @@ export const useWorlds = () => {
       }
       return data;
     } catch (err) {
-      setError('予期しないエラーが発生しました。');
+      const errorMessage = err instanceof Error ? err.message : '予期しないエラーが発生しました。';
+      setError(translateWorldError(errorMessage));
       return null;
     } finally {
       setIsLoading(false);
@@ -37,38 +42,37 @@ export const useWorlds = () => {
 
   const fetchAllWorlds = useCallback(async () => {
     if (!user) return;
-    const data = await worldAction(() =>
+    const data = await worldAction<World[]>(() =>
       supabase.from('worlds').select('*').eq('owner_id', user.id)
     );
     if (data) {
-      setWorlds(data as unknown as World[]);
+      setWorlds(data);
     }
   }, [user, worldAction]);
 
   const fetchWorldById = useCallback(async (id: string) => {
-    const data = await worldAction(() =>
+    const data = await worldAction<World>(() =>
       supabase.from('worlds').select('*').eq('id', id).single()
     );
     if (data) {
-        const world = data as unknown as World
-        setCurrentWorld(world);
-        return world
+      setCurrentWorld(data);
+      return data;
     }
-    return null
+    return null;
   }, [worldAction]);
 
   const createWorld = useCallback(
     async (worldData: Pick<World, 'title' | 'description'>) => {
       if (!user) return null;
-      const data = await worldAction(() =>
+      const data = await worldAction<World[]>(() =>
         supabase
           .from('worlds')
           .insert([{ ...worldData, owner_id: user.id }])
           .select()
       );
       
-      if (data) {
-        const newWorld = (data as unknown as World[])[0];
+      if (data && data.length > 0) {
+        const newWorld = data[0];
         setWorlds((prev) => [...prev, newWorld]);
         return newWorld;
       }
@@ -78,15 +82,14 @@ export const useWorlds = () => {
   );
 
   const deleteWorld = useCallback(async (id: string) => {
-    const data = await worldAction(() =>
+    const data = await worldAction<World[]>(() =>
       supabase.from('worlds').delete().eq('id', id).select()
     );
-
-    if (data) {
+    if (data && data.length > 0) {
         setWorlds((prev) => prev.filter((w) => w.id !== id));
-        return true
+        return true;
     }
-    return false
+    return false;
   }, [worldAction]);
 
   return {

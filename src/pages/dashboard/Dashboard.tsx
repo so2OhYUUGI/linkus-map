@@ -1,6 +1,6 @@
-// File Path: src/pages/test/TestDashboard.tsx
-// File Name: TestDashboard.tsx
-// Overview: A test dashboard page that displays a welcome message and a button to create a new world.
+// File Path: src/pages/dashboard/Dashboard.tsx
+// File Name: Dashboard.tsx
+// Overview: The main dashboard page where users can view and manage their worlds.
 
 import React, { useState } from 'react';
 import {
@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { CreateWorldForm } from '@/components/world';
 
-const TestDashboard: React.FC = () => {
+const Dashboard: React.FC = () => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
 
@@ -81,4 +81,4 @@ const TestDashboard: React.FC = () => {
   );
 };
 
-export default TestDashboard;
+export default Dashboard;
