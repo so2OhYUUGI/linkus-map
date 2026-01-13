@@ -1,8 +1,8 @@
 // src/hooks/useAuth.ts
 import { useState, useCallback } from 'react';
-import { supabase } from '../lib/supabase/client';
-import { translateAuthError } from '../utils/authErrors';
-import { validateSignUp } from '../utils/authValidation';
+import { supabase } from '@/lib/supabase/client';
+import { translateAuthError } from '@/utils/authErrors';
+import { validateSignUp } from '@/utils/authValidation';
 
 interface UseAuthReturn {
   isLoading: boolean;
@@ -10,7 +10,8 @@ interface UseAuthReturn {
   message: string | null;
   handleSignUp: (email: string, password: string, passwordConfirm: string) => Promise<boolean>;
   handleLogin: (email: string, password: string) => Promise<boolean>;
-  handlePasswordReset: (email: string) => Promise<boolean>; // 追加
+  handlePasswordReset: (email: string) => Promise<boolean>;
+  handleSignOut: () => Promise<void>; // 追加
   clearError: () => void;
   clearMessage: () => void;
 }
@@ -23,7 +24,6 @@ export const useAuth = (): UseAuthReturn => {
   const clearError = useCallback(() => setError(null), []);
   const clearMessage = useCallback(() => setMessage(null), []);
 
-  // 共通の処理をラップするヘルパー（内部用）
   const authAction = async (action: () => Promise<{ error: any }>, successMsg?: string): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
@@ -69,6 +69,11 @@ export const useAuth = (): UseAuthReturn => {
     );
   }, []);
 
+  // ★追加
+  const handleSignOut = useCallback(async () => {
+    await supabase.auth.signOut();
+  }, []);
+
   return {
     isLoading,
     error,
@@ -76,6 +81,7 @@ export const useAuth = (): UseAuthReturn => {
     handleSignUp,
     handleLogin,
     handlePasswordReset,
+    handleSignOut, // ★追加
     clearError,
     clearMessage,
   };

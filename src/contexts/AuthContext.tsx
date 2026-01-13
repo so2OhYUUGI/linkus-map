@@ -1,35 +1,51 @@
-// src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase/client';
+import { supabase } from '@/lib/supabase/client';
+import { useAuth } from '@/hooks'; // useAuthフックをインポート
 
-const AuthContext = createContext<{ user: User | null; loading: boolean }>({ user: null, loading: true });
+// コンテキストが提供する値の型を拡張
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  signOut: () => Promise<void>;
+}
+
+// 型アサーションを使い、デフォルト値を設定
+const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-	const [user, setUser] = useState<User | null>(null);
-	const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { handleSignOut } = useAuth(); // useAuthからsignOutを取得
 
-	useEffect(() => {
-		// 現在のセッションを確認
-		supabase.auth.getSession().then(({ data: { session } }) => {
-			setUser(session?.user ?? null);
-			setLoading(false);
-		});
+  useEffect(() => {
+    // 現在のセッションを確認
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
-		// ログイン・ログアウトの変更をリアルタイムで監視
-		const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-			setUser(session?.user ?? null);
-			setLoading(false);
-		});
+    // 認証状態の変更を監視
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
-		return () => subscription.unsubscribe();
-	}, []);
+    return () => subscription.unsubscribe();
+  }, []);
 
-	return (
-		<AuthContext.Provider value={{ user, loading }}>
-			{children}
-		</AuthContext.Provider>
-	);
+  // valueにsignOutを追加
+  const value = {
+    user,
+    loading,
+    signOut: handleSignOut,
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuthContext = () => useContext(AuthContext);
