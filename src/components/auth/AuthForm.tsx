@@ -65,7 +65,7 @@ const AuthForm: React.FC = () => {
     const success = await handleSignUp(email, password, passwordConfirm);
     if (success) {
       // 成功時はログインフォームに切り替え
-      setMode('login');
+      //setMode('login');
       // フォームをリセット
       setEmail('');
       setPassword('');
