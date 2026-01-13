@@ -2,30 +2,27 @@
 
 import React, { useState, useEffect } from 'react';
 import { Box, Button, TextField, Typography, Link, Alert, Stack, useTheme } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { useAuthForm } from '../../hooks/useAuthForm'; // <- 更新
+import { useAuthForm } from '../../hooks/useAuthForm';
 
 type AuthMode = 'login' | 'signup' | 'passwordReset';
 
 const AuthForm: React.FC = () => {
   const theme = useTheme();
-  const navigate = useNavigate();
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
 
-  // 新しいフックと関数名を使用
   const {
     isLoading,
     error,
     message,
-    signUp,          // <- 更新
-    login,           // <- 更新
-    passwordReset,   // <- 更新
+    signUp,
+    login,
+    passwordReset,
     clearError,
     clearMessage,
-  } = useAuthForm(); // <- 更新
+  } = useAuthForm();
 
   useEffect(() => {
     clearError();
@@ -38,14 +35,13 @@ const AuthForm: React.FC = () => {
       setEmail('');
       setPassword('');
       setPasswordConfirm('');
+      // メッセージはフック内で設定されるので、ここでは何もしない
     }
   };
 
   const onLoginSubmit = async () => {
-    const success = await login(email, password);
-    if (success) {
-      navigate('/dashboard');
-    }
+    // ログイン処理を呼び出すだけ。リダイレクトは PublicRoute に任せる。
+    await login(email, password);
   };
 
   const onResetSubmit = async () => {
