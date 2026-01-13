@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, TextField, Typography, Link, Alert, Stack, useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuthForm } from '../../hooks/useAuthForm'; // <- 更新
 
 type AuthMode = 'login' | 'signup' | 'passwordReset';
 
@@ -15,27 +15,25 @@ const AuthForm: React.FC = () => {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
 
-  // すべての認証ロジックをフックから取得
+  // 新しいフックと関数名を使用
   const {
     isLoading,
     error,
     message,
-    handleSignUp,
-    handleLogin,
-    handlePasswordReset, // フックに追加することを前提
+    signUp,          // <- 更新
+    login,           // <- 更新
+    passwordReset,   // <- 更新
     clearError,
     clearMessage,
-  } = useAuth();
+  } = useAuthForm(); // <- 更新
 
-  // モード変更時に状態をクリア
   useEffect(() => {
     clearError();
     clearMessage();
   }, [mode, clearError, clearMessage]);
 
-  // サインアップ送信
   const onSignUpSubmit = async () => {
-    const success = await handleSignUp(email, password, passwordConfirm);
+    const success = await signUp(email, password, passwordConfirm);
     if (success) {
       setEmail('');
       setPassword('');
@@ -43,19 +41,17 @@ const AuthForm: React.FC = () => {
     }
   };
 
-  // ログイン送信
   const onLoginSubmit = async () => {
-    const success = await handleLogin(email, password);
+    const success = await login(email, password);
     if (success) {
       navigate('/dashboard');
     }
   };
 
-  // パスワードリセット送信
   const onResetSubmit = async () => {
-    const success = await handlePasswordReset(email);
+    const success = await passwordReset(email);
     if (success) {
-      setEmail('');      // 入力欄をクリアして、メッセージを見せる
+      setEmail('');
     }
   };
 
@@ -87,7 +83,6 @@ const AuthForm: React.FC = () => {
         {titles[mode]}
       </Typography>
 
-      {/* 共通のエラー・メッセージ表示エリア */}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {message && <Alert severity="success" sx={{ mb: 2 }}>{message}</Alert>}
 

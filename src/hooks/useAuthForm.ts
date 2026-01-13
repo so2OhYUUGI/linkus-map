@@ -1,23 +1,23 @@
-// src/hooks/useAuth.ts
+// src/hooks/useAuthForm.ts
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import type { AuthError } from '@supabase/supabase-js';
-import { translateAuthError } from '@/utils/authErrors';
-import { validateSignUp } from '@/utils/authValidation';
+import { translateAuthError } from '../utils/authErrors';
+import { validateSignUp } from '../utils/authValidation';
 
-interface UseAuthReturn {
+interface UseAuthFormReturn {
   isLoading: boolean;
   error: string | null;
   message: string | null;
-  handleSignUp: (email: string, password: string, passwordConfirm: string) => Promise<boolean>;
-  handleLogin: (email: string, password: string) => Promise<boolean>;
-  handlePasswordReset: (email: string) => Promise<boolean>;
-  handleSignOut: () => Promise<void>; // 追加
+  signUp: (email: string, password: string, passwordConfirm: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
+  passwordReset: (email: string) => Promise<boolean>;
+  signOut: () => Promise<void>;
   clearError: () => void;
   clearMessage: () => void;
 }
 
-export const useAuth = (): UseAuthReturn => {
+export const useAuthForm = (): UseAuthFormReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export const useAuth = (): UseAuthReturn => {
     }
   };
 
-  const handleSignUp = useCallback(async (email: string, password: string, passwordConfirm: string) => {
+  const signUp = useCallback(async (email: string, password: string, passwordConfirm: string) => {
     const validationError = validateSignUp(password, passwordConfirm);
     if (validationError) {
       setError(validationError);
@@ -57,11 +57,11 @@ export const useAuth = (): UseAuthReturn => {
     );
   }, []);
 
-  const handleLogin = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     return authAction(() => supabase.auth.signInWithPassword({ email, password }));
   }, []);
 
-  const handlePasswordReset = useCallback(async (email: string) => {
+  const passwordReset = useCallback(async (email: string) => {
     return authAction(
       () => supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/update-password`,
@@ -70,8 +70,7 @@ export const useAuth = (): UseAuthReturn => {
     );
   }, []);
 
-  // ★追加
-  const handleSignOut = useCallback(async () => {
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut();
   }, []);
 
@@ -79,10 +78,10 @@ export const useAuth = (): UseAuthReturn => {
     isLoading,
     error,
     message,
-    handleSignUp,
-    handleLogin,
-    handlePasswordReset,
-    handleSignOut, // ★追加
+    signUp,
+    login,
+    passwordReset,
+    signOut,
     clearError,
     clearMessage,
   };
