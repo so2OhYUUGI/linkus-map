@@ -1,18 +1,14 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { World } from '@/types/world';
-import { useAuth } from '@/hooks'; // <- パスを修正
+import { useAuth } from '@/hooks';
 
-// エラーメッセージを翻訳（この関数は別途utilsに定義することを想定）
 const translateWorldError = (message: string): string => {
-  // ここでSupabaseから返される可能性のあるエラーメッセージを日本語に変換
-  // 例: 'new row violates row-level security policy for table "worlds"'
   if (message.includes('security policy')) {
     return '指定された操作を行う権限がありません。';
   }
   return 'ワールドの操作中に予期しないエラーが発生しました。';
 };
-
 
 export const useWorlds = () => {
   const [worlds, setWorlds] = useState<World[]>([]);
@@ -21,7 +17,7 @@ export const useWorlds = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const worldAction = async <T>(action: () => Promise<{ data: T | null; error: any }>): Promise<T | null> => {
+  const worldAction = useCallback(async <T>(action: () => Promise<{ data: T | null; error: any }>): Promise<T | null> => {
     setIsLoading(true);
     setError(null);
     try {
@@ -37,7 +33,7 @@ export const useWorlds = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const fetchAllWorlds = useCallback(async () => {
     if (!user) return;
@@ -47,7 +43,7 @@ export const useWorlds = () => {
     if (data) {
       setWorlds(data as unknown as World[]);
     }
-  }, [user]);
+  }, [user, worldAction]);
 
   const fetchWorldById = useCallback(async (id: string) => {
     const data = await worldAction(() =>
@@ -59,7 +55,7 @@ export const useWorlds = () => {
         return world
     }
     return null
-  }, []);
+  }, [worldAction]);
 
   const createWorld = useCallback(
     async (worldData: Pick<World, 'title' | 'description'>) => {
@@ -78,7 +74,7 @@ export const useWorlds = () => {
       }
       return null;
     },
-    [user]
+    [user, worldAction]
   );
 
   const deleteWorld = useCallback(async (id: string) => {
@@ -91,7 +87,7 @@ export const useWorlds = () => {
         return true
     }
     return false
-  }, []);
+  }, [worldAction]);
 
   return {
     worlds,
