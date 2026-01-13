@@ -1,9 +1,12 @@
 import { RouterProvider } from 'react-router-dom';
-import { router } from './routes'; // 先ほど作成した routes/index.tsx をインポート
+import { router } from './routes';
+import { AuthProvider } from './contexts/AuthContext'; // 追加
 
 const App = () => {
   return (
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   );
 };
 

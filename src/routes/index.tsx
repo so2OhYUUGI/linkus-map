@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import LandingPage from '../pages/LandingPage';
 import TestDashboard from '../pages/test/TestDashboard';
+import { ProtectedRoute } from './ProtectedRoute';
 
 export const router = createBrowserRouter([
   {
@@ -15,7 +16,11 @@ export const router = createBrowserRouter([
   {
     // テスト用ルート
     path: '/dashboard',
-    element: <TestDashboard />,
+    element: (
+      <ProtectedRoute>
+        <TestDashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     // 未定義のパスはトップへリダイレクト
