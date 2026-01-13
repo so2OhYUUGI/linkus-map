@@ -1,98 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, TextField, Typography, Link, Alert, Stack, useTheme } from '@mui/material';
-import { supabase } from '../../lib/supabase/client'; // Supabaseクライアントをインポート
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
-// フォームのモードを定義
 type AuthMode = 'login' | 'signup' | 'passwordReset';
 
 const AuthForm: React.FC = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
-  
-  // サインアップ用のカスタムフック
+
+  // すべての認証ロジックをフックから取得
   const {
-    isLoading: isSignUpLoading,
-    error: signUpError,
-    message: signUpMessage,
+    isLoading,
+    error,
+    message,
     handleSignUp,
-    clearError: clearSignUpError,
-    clearMessage: clearSignUpMessage,
+    handleLogin,
+    handlePasswordReset, // フックに追加することを前提
+    clearError,
+    clearMessage,
   } = useAuth();
 
-  // ログインとパスワードリセット用のローカルステート
-  const [loginError, setLoginError] = useState<string | null>(null);
-  const [loginMessage, setLoginMessage] = useState<string | null>(null);
-  const [loginLoading, setLoginLoading] = useState(false);
-  const [passwordResetError, setPasswordResetError] = useState<string | null>(null);
-  const [passwordResetMessage, setPasswordResetMessage] = useState<string | null>(null);
-  const [passwordResetLoading, setPasswordResetLoading] = useState(false);
-
-  // モード変更時にエラーとメッセージをクリア
+  // モード変更時に状態をクリア
   useEffect(() => {
-    clearSignUpError();
-    clearSignUpMessage();
-    setLoginError(null);
-    setLoginMessage(null);
-    setPasswordResetError(null);
-    setPasswordResetMessage(null);
-  }, [mode, clearSignUpError, clearSignUpMessage]);
+    clearError();
+    clearMessage();
+  }, [mode, clearError, clearMessage]);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginLoading(true);
-    setLoginError(null);
-    setLoginMessage(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      // エラーメッセージをユーザーフレンドリーな日本語に変換
-      let errorMessage = error.message;
-      if (error.message.includes('Invalid login credentials')) {
-        errorMessage = 'メールアドレスまたはパスワードが正しくありません。';
-      } else if (error.message.includes('Email not confirmed')) {
-        errorMessage = 'メールアドレスの確認が完了していません。メールボックスを確認してください。';
-      }
-      setLoginError(errorMessage);
-    }
-    setLoginLoading(false);
-  };
-
-  const handleSignUpSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // サインアップ送信
+  const onSignUpSubmit = async () => {
     const success = await handleSignUp(email, password, passwordConfirm);
     if (success) {
-      // 成功時はログインフォームに切り替え
-      //setMode('login');
-      // フォームをリセット
       setEmail('');
       setPassword('');
       setPasswordConfirm('');
     }
   };
 
-  const handlePasswordReset = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPasswordResetLoading(true);
-    setPasswordResetError(null);
-    setPasswordResetMessage(null);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/update-password`,
-    });
-    if (error) {
-      // エラーメッセージをユーザーフレンドリーな日本語に変換
-      let errorMessage = error.message;
-      if (error.message.includes('rate limit')) {
-        errorMessage = 'リクエストが多すぎます。しばらく待ってから再度お試しください。';
-      }
-      setPasswordResetError(errorMessage);
-    } else {
-      setPasswordResetMessage('パスワードリセット用のメールを送信しました。');
+  // ログイン送信
+  const onLoginSubmit = async () => {
+    const success = await handleLogin(email, password);
+    if (success) {
+      navigate('/dashboard');
+    }
+  };
+
+  // パスワードリセット送信
+  const onResetSubmit = async () => {
+    const success = await handlePasswordReset(email);
+    if (success) {
       setMode('login');
     }
-    setPasswordResetLoading(false);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (mode === 'login') onLoginSubmit();
+    else if (mode === 'signup') onSignUpSubmit();
+    else onResetSubmit();
   };
 
   const titles = {
@@ -115,47 +84,12 @@ const AuthForm: React.FC = () => {
       <Typography variant="h4" component="h1" gutterBottom align="center">
         {titles[mode]}
       </Typography>
-      
-      {/* エラーとメッセージの表示 */}
-      {mode === 'signup' && signUpError && (
-        <Alert severity="error" sx={{ mb: theme.spacing(2) }}>
-          {signUpError}
-        </Alert>
-      )}
-      {mode === 'signup' && signUpMessage && (
-        <Alert severity="success" sx={{ mb: theme.spacing(2) }}>
-          {signUpMessage}
-        </Alert>
-      )}
-      {mode === 'login' && loginError && (
-        <Alert severity="error" sx={{ mb: theme.spacing(2) }}>
-          {loginError}
-        </Alert>
-      )}
-      {mode === 'login' && loginMessage && (
-        <Alert severity="success" sx={{ mb: theme.spacing(2) }}>
-          {loginMessage}
-        </Alert>
-      )}
-      {mode === 'passwordReset' && passwordResetError && (
-        <Alert severity="error" sx={{ mb: theme.spacing(2) }}>
-          {passwordResetError}
-        </Alert>
-      )}
-      {mode === 'passwordReset' && passwordResetMessage && (
-        <Alert severity="success" sx={{ mb: theme.spacing(2) }}>
-          {passwordResetMessage}
-        </Alert>
-      )}
 
-      <Box
-        component="form"
-        onSubmit={
-            mode === 'login' ? handleLogin :
-            mode === 'signup' ? handleSignUpSubmit :
-            handlePasswordReset
-        }
-      >
+      {/* 共通のエラー・メッセージ表示エリア */}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {message && <Alert severity="success" sx={{ mb: 2 }}>{message}</Alert>}
+
+      <Box component="form" onSubmit={handleSubmit}>
         <TextField
           label="メールアドレス"
           type="email"
@@ -187,87 +121,34 @@ const AuthForm: React.FC = () => {
             sx={{ mb: 2 }}
           />
         )}
+
         <Stack spacing={2}>
-          <Button 
-            type="submit" 
-            variant="contained" 
-            fullWidth 
-            disabled={
-              mode === 'signup' ? isSignUpLoading :
-              mode === 'login' ? loginLoading :
-              passwordResetLoading
-            }
-          >
-            {mode === 'signup' && isSignUpLoading && '処理中...'}
-            {mode === 'signup' && !isSignUpLoading && titles[mode]}
-            {mode === 'login' && loginLoading && '処理中...'}
-            {mode === 'login' && !loginLoading && titles[mode]}
-            {mode === 'passwordReset' && passwordResetLoading && '処理中...'}
-            {mode === 'passwordReset' && !passwordResetLoading && titles[mode]}
+          <Button type="submit" variant="contained" fullWidth disabled={isLoading}>
+            {isLoading ? '処理中...' : titles[mode]}
           </Button>
-          
+
           {mode === 'login' && (
-            <>
-              <Link 
-                component="button" 
-                variant="body2" 
-                onClick={() => setMode('passwordReset')}
-                sx={{ 
-                  textAlign: 'center',
-                  display: 'block',
-                  textDecoration: 'none',
-                  '&:hover': {
-                    textDecoration: 'underline',
-                  },
-                }}
-              >
-                パスワードを忘れた方はこちら
-              </Link>
-            </>
+            <Link
+              component="button"
+              type="button"
+              variant="body2"
+              onClick={() => setMode('passwordReset')}
+              sx={{ textAlign: 'center', display: 'block', textDecoration: 'none' }}
+            >
+              パスワードを忘れた方はこちら
+            </Link>
           )}
         </Stack>
       </Box>
 
       <Box textAlign="center" sx={{ mt: 3 }}>
-        {mode === 'login' && (
-          <Button
-            variant="outlined"
-            fullWidth
-            onClick={() => setMode('signup')}
-          >
-            アカウントの作成
-          </Button>
-        )}
-        {mode === 'signup' && (
-          <Link 
-            component="button" 
-            variant="body2" 
-            onClick={() => setMode('login')}
-            sx={{
-              textDecoration: 'none',
-              '&:hover': {
-                textDecoration: 'underline',
-              },
-            }}
-          >
-            すでにアカウントをお持ちですか？ ログイン
-          </Link>
-        )}
-        {mode === 'passwordReset' && (
-          <Link 
-            component="button" 
-            variant="body2" 
-            onClick={() => setMode('login')}
-            sx={{
-              textDecoration: 'none',
-              '&:hover': {
-                textDecoration: 'underline',
-              },
-            }}
-          >
-            ログインページに戻る
-          </Link>
-        )}
+        <Button
+          variant="outlined"
+          fullWidth
+          onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
+        >
+          {mode === 'login' ? '新規アカウント作成' : 'ログインページに戻る'}
+        </Button>
       </Box>
     </Box>
   );

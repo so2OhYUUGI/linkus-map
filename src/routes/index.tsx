@@ -14,7 +14,7 @@ export const router = createBrowserRouter([
   },
   {
     // テスト用ルート
-    path: '/test',
+    path: '/dashboard',
     element: <TestDashboard />,
   },
   {
