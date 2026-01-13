@@ -1,3 +1,4 @@
+
 // File Path: src/pages/dashboard/Dashboard.tsx
 // File Name: Dashboard.tsx
 // Overview: The main dashboard page where users can view and manage their worlds.
@@ -18,8 +19,11 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Card,
+  CardActionArea,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
+import AddIcon from '@mui/icons-material/Add';
 import { CreateWorldForm } from '@/components/world';
 import { useWorlds } from '@/hooks/useWorlds';
 import type { World } from '@/types/world';
@@ -73,7 +77,6 @@ const Dashboard: React.FC = () => {
   )}, transparent 50%)`;
 
   const renderContent = () => {
-    // 1. 初回ロード中（データがまだ一つもない時だけローディングを出す）
     if (isLoading && worlds.length === 0) {
       return (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 10 }}>
@@ -86,33 +89,76 @@ const Dashboard: React.FC = () => {
       return <Alert severity="error">{error}</Alert>;
     }
 
-    // 2. データが空（ロードが終わっていて、かつ本当に0件の時だけ）
-    if (!isLoading && worlds.length === 0) {
+    if (worlds.length === 0) {
       return (
-        <Paper elevation={0} sx={{ width: '100%', maxWidth: theme.spacing(80), p: { xs: 4, md: 6 } }}>
-          <Stack spacing={3} alignItems="flex-start">
-            <Stack spacing={1}>
-              <Typography variant="overline" color="text.secondary">
-                空のワールド
-              </Typography>
-              <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
-                新しい世界を創造しましょう
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                まだワールドがありません。最初の世界を生み出して、物語のつながりを描き始めましょう。
-              </Typography>
-            </Stack>
-            <Button variant="contained" size="large" onClick={handleCreateOpen}>
-              ＋ ワールド新規作成
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            minHeight: '70vh', // Ensure vertical centering
+            py: { xs: 4, md: 8 },
+          }}
+        >
+          <Stack spacing={3} alignItems="center">
+            <Typography
+              variant="h3"
+              component="h1"
+              sx={{ fontWeight: 700, textShadow: `0 0 20px ${alpha(theme.palette.primary.main, 0.3)}` }}
+            >
+              新しい世界を創造しましょう
+            </Typography>
+            <Typography variant="h6" color="text.secondary" sx={{ maxWidth: '600px' }}>
+              まだワールドがありません。最初の世界を生み出して、物語のつながりを描き始めましょう。
+            </Typography>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handleCreateOpen}
+              startIcon={<AddIcon />}
+              sx={{ mt: 2 }}
+            >
+              ワールド新規作成
             </Button>
           </Stack>
-        </Paper>
+        </Box>
       );
     }
 
-    // 3. データがある場合（ロード中であっても、既存のデータがあればこちらを出す）
     return (
-      <Grid container spacing={3}>
+      <Grid container spacing={4}>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Card
+            sx={{
+              height: '100%',
+              border: `2px dashed ${theme.palette.divider}`,
+              transition: 'border-color 0.3s, background-color 0.3s',
+              '&:hover': {
+                borderColor: theme.palette.primary.main,
+                bgcolor: alpha(theme.palette.primary.main, 0.05),
+              },
+            }}
+          >
+            <CardActionArea
+              onClick={handleCreateOpen}
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                p: 3,
+              }}
+            >
+              <AddIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
+              <Typography variant="h6" color="text.secondary">
+                新規作成
+              </Typography>
+            </CardActionArea>
+          </Card>
+        </Grid>
         {worlds.map((world) => (
           <Grid size={{ xs: 12, sm: 6, md: 4 }} key={world.id}>
             <WorldCard world={world} onDelete={handleDeleteRequest} />
@@ -128,7 +174,7 @@ const Dashboard: React.FC = () => {
         sx={{
           minHeight: '100%',
           bgcolor: 'background.default',
-          py: { xs: 6, md: 10 },
+          py: { xs: 4, md: 8 },
           px: { xs: 3, md: 6 },
           backgroundImage: backgroundGlow,
         }}

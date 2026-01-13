@@ -122,7 +122,7 @@ export const WorldCard: React.FC<WorldCardProps> = ({ world, onDelete }) => {
       <Menu
         anchorEl={anchorEl}
         open={isMenuOpen}
-        onClose={handleMenuClose}
+        onClose={() => handleMenuClose()}
         // 3. Stop propagation on the menu itself to prevent card click
         onClick={(e) => e.stopPropagation()}
         MenuListProps={{
