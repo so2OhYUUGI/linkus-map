@@ -4,11 +4,11 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { useAuthState } from '@/hooks/useAuthState';
+import { useAuthContext } from '@/contexts/AuthContext'; // 1. useAuthContextをインポート
 import type { World, NewWorld } from '@/types/world';
 
 export const useWorlds = () => {
-  const { user } = useAuthState();
+  const { user } = useAuthContext(); // 2. useAuthStateからuseAuthContextに変更
   const [worlds, setWorlds] = useState<World[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

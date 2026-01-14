@@ -4,18 +4,14 @@
 
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthContext } from '@/contexts';
-import { Box, CircularProgress } from '@mui/material';
+import FullscreenLoading from '@/components/layout/FullscreenLoading';
 
 export const PublicRoute = () => {
-	const { user, isLoading } = useAuthContext();
+	const { user, isInitialLoading } = useAuthContext();
 	const location = useLocation();
 
-	if (isLoading) {
-		return (
-			<Box sx={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.default' }}>
-				<CircularProgress />
-			</Box>
-		);
+	if (isInitialLoading) {
+		return <FullscreenLoading />;
 	}
 
 	const isUpdatingPassword = location.pathname === '/auth/update-password';

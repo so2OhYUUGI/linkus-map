@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Box, Button, TextField, Typography, Link, Alert, Stack, useTheme } from '@mui/material';
+import { useAuthContext } from '@/contexts/AuthContext'; // 1. useAuthContextをインポート
 import { useAuthForm } from '@/hooks/useAuthForm';
 
 type AuthMode = 'login' | 'signup' | 'passwordReset';
@@ -13,16 +14,22 @@ const AuthForm: React.FC = () => {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
 
+  // 2. useAuthContextから状態とクリア関数を取得
   const {
-    isLoading,
+    isSubmitting,
     error,
+    clearError,
+  } = useAuthContext();
+
+  // 3. フォームの送信ロジックはAuthForm内に保持
+  const {
     message,
     signUp,
     login,
     passwordReset,
-    clearError,
     clearMessage,
   } = useAuthForm();
+
 
   useEffect(() => {
     clearError();
@@ -116,8 +123,8 @@ const AuthForm: React.FC = () => {
         )}
 
         <Stack spacing={2}>
-          <Button type="submit" variant="contained" fullWidth disabled={isLoading}>
-            {isLoading ? '処理中...' : titles[mode]}
+          <Button type="submit" variant="contained" fullWidth disabled={isSubmitting}>
+            {isSubmitting ? '処理中...' : titles[mode]} 
           </Button>
 
           {mode === 'login' && (
