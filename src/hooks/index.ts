@@ -4,5 +4,5 @@
 
 export * from './useAuth/useAuthForm';
 export * from './useAuth/useAuthState';
-export * from './useAuth/index';
+export * from './useAuth/useAuth';
 export * from './useWorlds';

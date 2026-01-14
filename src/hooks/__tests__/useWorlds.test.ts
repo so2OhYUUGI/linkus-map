@@ -5,7 +5,7 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, type Mock } from 'vitest';
 import { useWorlds } from '../useWorlds';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth/useAuth';
 
 // Supabase Clientのモック
 const mockSelect = vi.fn();
