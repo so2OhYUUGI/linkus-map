@@ -24,7 +24,7 @@ import {
 import Grid from '@mui/material/Grid';
 import AddIcon from '@mui/icons-material/Add';
 import { CreateWorldForm } from '@/components/world';
-import { useWorlds } from '@/hooks/useWorlds';
+import { useWorlds } from '@/hooks';
 import type { World } from '@/types/world';
 import { WorldCard } from '@/components/world/WorldCard';
 
