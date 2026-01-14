@@ -9,10 +9,10 @@
 
 import { Box } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import ForceGraph2D, type {
-   ForceGraphMethods,
-   NodeObject,
-   LinkObject,
+import ForceGraph2D, {
+  type ForceGraphMethods,
+  type NodeObject,
+  type LinkObject,
 } from 'react-force-graph-2d';
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 
@@ -164,8 +164,8 @@ const WorldDetail = () => {
       customNode === hoverNode
         ? 'rgb(255,160,122)'
         : highlightNodes.size > 0 && !highlightNodes.has(customNode)
-        ? 'rgba(180, 180, 180, 0.5)'
-        : 'rgba(31, 120, 180, 0.8)';
+          ? 'rgba(180, 180, 180, 0.5)'
+          : 'rgba(31, 120, 180, 0.8)';
     ctx.fill();
 
     ctx.textAlign = 'center';
@@ -193,20 +193,20 @@ const WorldDetail = () => {
     const controlPoints = (link as any).__controlPoints;
     let textPos;
     if (controlPoints) {
-        // 曲線の中間点を計算
-        const [cpX, cpY] = controlPoints;
-        const t = 0.5; // 中間点
-        const invT = 1 - t;
-        textPos = {
-            x: invT * invT * start.x + 2 * invT * t * cpX + t * t * end.x,
-            y: invT * invT * start.y + 2 * invT * t * cpY + t * t * end.y
-        };
+      // 曲線の中間点を計算
+      const [cpX, cpY] = controlPoints;
+      const t = 0.5; // 中間点
+      const invT = 1 - t;
+      textPos = {
+        x: invT * invT * start.x + 2 * invT * t * cpX + t * t * end.x,
+        y: invT * invT * start.y + 2 * invT * t * cpY + t * t * end.y
+      };
     } else {
-        // 直線の中間点
-        textPos = {
-            x: start.x + (end.x - start.x) / 2,
-            y: start.y + (end.y - start.y) / 2,
-        };
+      // 直線の中間点
+      textPos = {
+        x: start.x + (end.x - start.x) / 2,
+        y: start.y + (end.y - start.y) / 2,
+      };
     }
 
     const fontSize = 12 / globalScale;
