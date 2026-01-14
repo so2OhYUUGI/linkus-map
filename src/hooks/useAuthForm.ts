@@ -58,6 +58,7 @@ export const useAuthForm = (): UseAuthFormReturn => {
       }
       return true;
     } catch (e) {
+      console.error('Auth Error:', e);
       setError('予期しないエラーが発生しました。');
       return false;
     } finally {
