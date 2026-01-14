@@ -1,3 +1,4 @@
+
 // File Path: src/routes/router.tsx
 // File Name: router.tsx
 // Overview: Defines the main application routes using `createBrowserRouter`.
@@ -8,6 +9,7 @@ import Dashboard from '@/components/layout/DashboardLayout';
 import WorldSelector from '@/pages/dashboard/WorldSelector';
 import UpdatePasswordPage from '@/pages/auth/UpdatePasswordPage';
 import { ProtectedRoute, PublicRoute } from '@/routes';
+import WorldDetail from '@/pages/dashboard/WorldDetail';
 
 export const router = createBrowserRouter([
   // Public routes
@@ -31,20 +33,15 @@ export const router = createBrowserRouter([
     children: [
       {
         path: '/dashboard',
-        element: <Dashboard />,
-      },
-    ],
-  },
-  {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        path: '/dashboard',
-        element: <Dashboard />, // これがレイアウト（親）になる
+        element: <Dashboard />, // This acts as the layout (parent)
         children: [
           {
-            index: true, // /dashboard にアクセスした時
+            index: true, // Renders at /dashboard
             element: <WorldSelector />,
+          },
+          {
+            path: 'worlds/:worldId', // Renders at /dashboard/worlds/:worldId
+            element: <WorldDetail />,
           },
         ],
       },
