@@ -1,9 +1,19 @@
 // src/components/auth/AuthForm.tsx
 
+/*
+ * [アーキテクチャ設計方針]
+ * このコンポーネントは、認証フォームの「ビュー」に責務を特化させています。
+ * フォームの見た目と、ユーザー操作（入力、ボタンクリック）のみを扱い、
+ * 認証ロジック（API通信、状態管理）はすべて `useAuthContext` を経由して取得します。
+ *
+ * ◆ 利用規約:
+ * ・ 認証関連のロジックは `useAuthContext` フックからのみ取得してください。
+ * ・ `useAuthForm` や `useAuthState` といった下位のフックを直接利用することは禁止です。
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Box, Button, TextField, Typography, Link, Alert, Stack, useTheme } from '@mui/material';
-import { useAuthContext } from '@/contexts/AuthContext'; // 1. useAuthContextをインポート
-import { useAuthForm } from '@/hooks/useAuthForm';
+import { useAuthContext } from '@/contexts'; // 集約されたindex.ts経由でインポート
 
 type AuthMode = 'login' | 'signup' | 'passwordReset';
 
@@ -14,40 +24,39 @@ const AuthForm: React.FC = () => {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
 
-  // 2. useAuthContextから状態とクリア関数を取得
+  // AuthContextから必要なすべての状態と関数を取得
   const {
     isSubmitting,
     error,
-    clearError,
-  } = useAuthContext();
-
-  // 3. フォームの送信ロジックはAuthForm内に保持
-  const {
     message,
     signUp,
     login,
     passwordReset,
+    clearError,
     clearMessage,
-  } = useAuthForm();
+  } = useAuthContext();
 
-
+  // フォームの種類（mode）が切り替わった時に、エラーとメッセージをクリアする
   useEffect(() => {
     clearError();
     clearMessage();
   }, [mode, clearError, clearMessage]);
 
+  // --- フォーム送信ハンドラ --- //
+
   const onSignUpSubmit = async () => {
     const success = await signUp(email, password, passwordConfirm);
     if (success) {
+      // 成功した場合、入力フィールドをクリア
       setEmail('');
       setPassword('');
       setPasswordConfirm('');
-      // メッセージはフック内で設定されるので、ここでは何もしない
+      // 成功メッセージはContext側で設定される
     }
   };
 
   const onLoginSubmit = async () => {
-    // ログイン処理を呼び出すだけ。リダイレクトは PublicRoute に任せる。
+    // ログイン処理を呼び出すだけ。成功後のリダイレクトは上位のRouteコンポーネントが責務を持つ。
     await login(email, password);
   };
 
@@ -64,6 +73,8 @@ const AuthForm: React.FC = () => {
     else if (mode === 'signup') onSignUpSubmit();
     else onResetSubmit();
   };
+
+  // --- レンダリング --- //
 
   const titles = {
     login: 'ログイン',
@@ -86,6 +97,7 @@ const AuthForm: React.FC = () => {
         {titles[mode]}
       </Typography>
 
+      {/* エラーまたは成功メッセージをContextから受け取って表示 */}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {message && <Alert severity="success" sx={{ mb: 2 }}>{message}</Alert>}
 
@@ -124,7 +136,7 @@ const AuthForm: React.FC = () => {
 
         <Stack spacing={2}>
           <Button type="submit" variant="contained" fullWidth disabled={isSubmitting}>
-            {isSubmitting ? '処理中...' : titles[mode]} 
+            {isSubmitting ? '処理中...' : titles[mode]}
           </Button>
 
           {mode === 'login' && (

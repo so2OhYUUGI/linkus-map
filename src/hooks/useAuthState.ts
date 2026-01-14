@@ -1,67 +1,56 @@
-// File Path: src/hooks/useAuthState.ts
-// Overview: Provides authentication state and actions with initialization tracking.
+// src/hooks/useAuthState.ts
+
+/*
+ * [アーキテクチャ設計方針]
+ * このフックは、グローバルな認証状態の管理に特化したカスタムフックです。
+ * Supabase の `onAuthStateChange` をサブスクライブし、現在のユーザー情報と
+ * アプリケーションの初回ロード状態（isInitialLoading）をリアルタイムで提供します。
+ *
+ * ◆ 責務:
+ * ・ 認証状態の監視と更新
+ * ・ ユーザー情報の提供
+ * ・ サインアウト処理の提供
+ *
+ * ◆ 利用規約:
+ * ・ このフックは原則として `AuthContext` の内部でのみ使用してください。
+ * ・ ビューコンポーネントが直接このフックを呼び出すことは想定していません。
+ *   認証状態へのアクセスは `useAuthContext()` を経由して行うべきです。
+ */
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
-export interface UseAuthReturn {
+interface UseAuthStateReturn {
   user: User | null;
-  isInitialLoading: boolean; // ✅ isInitialLoading に変更
+  isInitialLoading: boolean;
   signOut: () => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
 }
 
-export const useAuthState = (): UseAuthReturn => {
+export const useAuthState = (): UseAuthStateReturn => {
   const [user, setUser] = useState<User | null>(null);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
-    // 最初に現在のユーザーセッションを取得
-    const fetchUser = async () => {
-      const {
-        data: { user: currentUser },
-      } = await supabase.auth.getUser();
+    // 認証状態の変更を監視するリスナーを設定
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user ?? null;
       setUser(currentUser);
-      // これで初期ユーザーチェックは完了
-      setIsInitialLoading(false);
-    };
-
-    fetchUser();
-
-    // 認証状態の変更を監視するリスナー
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      // 状態変更が検知された時点で、初期ロードは完了していると見なす
+      // ユーザーセッションの読み込みが完了したら、ローディング状態を解除
       setIsInitialLoading(false);
     });
 
-    // コンポーネントのアンマウント時にリスナーを解除
+    // コンポーネントのアンマウント時にリスナーをクリーンアップ
     return () => {
-      subscription.unsubscribe();
+      authListener.subscription.unsubscribe();
     };
   }, []);
 
+  // サインアウト処理
   const signOut = useCallback(async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Error signing out:', error);
-    }
+    await supabase.auth.signOut();
+    // onAuthStateChange が発火するので、ここで user を null にする必要はない
   }, []);
 
-  const signInWithGoogle = useCallback(async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/`,
-      },
-    });
-    if (error) {
-      console.error('Error signing in with Google:', error);
-    }
-  }, []);
-
-  return { user, isInitialLoading, signOut, signInWithGoogle };
+  return { user, isInitialLoading, signOut };
 };
