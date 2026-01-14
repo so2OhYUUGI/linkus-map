@@ -4,7 +4,8 @@
 
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import LandingPage from '@/pages/LandingPage';
-import Dashboard from '@/pages/dashboard/Dashboard';
+import Dashboard from '@/components/layout/DashboardLayout';
+import WorldSelector from '@/pages/dashboard/WorldSelector';
 import UpdatePasswordPage from '@/pages/auth/UpdatePasswordPage';
 import { ProtectedRoute, PublicRoute } from '@/routes';
 
@@ -31,6 +32,21 @@ export const router = createBrowserRouter([
       {
         path: '/dashboard',
         element: <Dashboard />,
+      },
+    ],
+  },
+  {
+    element: <ProtectedRoute />,
+    children: [
+      {
+        path: '/dashboard',
+        element: <Dashboard />, // これがレイアウト（親）になる
+        children: [
+          {
+            index: true, // /dashboard にアクセスした時
+            element: <WorldSelector />,
+          },
+        ],
       },
     ],
   },

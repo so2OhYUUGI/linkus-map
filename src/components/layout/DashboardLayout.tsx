@@ -1,8 +1,8 @@
-// File Path: src/pages/dashboard/Dashboard.tsx
-// File Name: Dashboard.tsx
+// File Path: src/pages/dashboard/DashboardLayout.tsx
+// File Name: DashboardLayout.tsx
 // Overview: The main dashboard page where users can view and manage their worlds.
 
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/hooks';
 import { Box, Paper, Typography, Stack, IconButton, Avatar, Divider } from '@mui/material';
 import GridViewIcon from '@mui/icons-material/GridView';
@@ -10,7 +10,6 @@ import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
-import WorldSelector from './WorldSelector';
 
 const Dashboard: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -51,7 +50,7 @@ const Dashboard: React.FC = () => {
 
         {/* --- ここに各ページの中身が表示される --- */}
         <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
-          <WorldSelector />
+          <Outlet />
         </Box>
       </Box>
     </Box>
