@@ -9,10 +9,10 @@
 
 import { Box } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import ForceGraph2D, {
-  type ForceGraphMethods,
-  type NodeObject,
-  type LinkObject,
+import ForceGraph2D, type {
+   ForceGraphMethods,
+   NodeObject,
+   LinkObject,
 } from 'react-force-graph-2d';
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 
