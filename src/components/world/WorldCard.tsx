@@ -1,3 +1,4 @@
+
 // File Path: src/components/world/WorldCard.tsx
 // File Name: WorldCard.tsx
 // Overview: A card component to display world information and actions.
@@ -49,7 +50,7 @@ export const WorldCard: React.FC<WorldCardProps> = ({ world, onDelete }) => {
   };
 
   const handleCardClick = () => {
-    navigate(`/world/${world.id}`);
+    navigate(`/dashboard/worlds/${world.id}`);
   };
 
   // Combine hover and menu open state to keep the card elevated
