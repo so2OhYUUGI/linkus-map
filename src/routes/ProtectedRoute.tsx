@@ -4,7 +4,7 @@
 
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthContext } from '@/contexts';
-import FullscreenLoading from '@/components/layout/FullscreenLoading';
+import { FullscreenLoading } from '@/components/layout';
 
 export const ProtectedRoute = () => {
   const { user, isInitialLoading, signOut } = useAuthContext();

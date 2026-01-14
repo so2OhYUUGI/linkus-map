@@ -4,7 +4,7 @@
 
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthContext } from '@/contexts';
-import FullscreenLoading from '@/components/layout/FullscreenLoading';
+import { FullscreenLoading } from '@/components/layout';
 
 export const PublicRoute = () => {
 	const { user, isInitialLoading } = useAuthContext();
