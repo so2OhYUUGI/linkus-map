@@ -1,6 +1,6 @@
 // src/hooks/useAuth/index.ts
 import { useContext } from 'react';
-import { AuthContext } from '@/contexts/AuthContextInstance';
+import { AuthContext } from '@/contexts/AuthContext';
 
 /**
  * 認証に関するすべての状態とアクションにアクセスするための統合フック。

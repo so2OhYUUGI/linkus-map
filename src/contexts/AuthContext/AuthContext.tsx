@@ -20,7 +20,7 @@
 import React from 'react';
 import { useAuthState, useAuthForm } from '@/hooks/useAuth/';
 import type { AuthContextType } from '@/types/auth'; // 型定義が別にある場合
-import { AuthContext } from '@/contexts/AuthContextInstance';
+import { AuthContext } from '@/contexts/AuthContext/AuthContextInstance';
 
 /**
  * アプリケーションに認証機能を提供するProviderコンポーネント。
