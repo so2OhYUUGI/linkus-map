@@ -10,17 +10,25 @@
 import { Box } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import ForceGraph2D, {
-  ForceGraphMethods,
-  NodeObject,
-  LinkObject,
+  type ForceGraphMethods,
+  type NodeObject,
+  type LinkObject,
 } from 'react-force-graph-2d';
 import { useRef, useEffect, useState, useCallback } from 'react';
 
-// カスタムノードの型定義
+// カスタムノードとリンクの型定義
 interface CustomNodeObject extends NodeObject {
   id: string;
   name: string;
   val: number;
+}
+
+interface CustomLinkObject extends LinkObject {
+  source: string | CustomNodeObject;
+  target: string | CustomNodeObject;
+  label: string;
+  type: 'positive' | 'negative' | 'neutral';
+  strength: number;
 }
 
 const WorldDetail = () => {
@@ -41,7 +49,7 @@ const WorldDetail = () => {
     }
   }, []);
 
-  // ダミーデータに `name` プロパティを追加
+  // ダミーデータの更新
   const graphData = {
     nodes: [
       { id: '主人公', name: '主人公', val: 20 },
@@ -51,12 +59,42 @@ const WorldDetail = () => {
       { id: 'ヒロイン', name: 'ヒロイン', val: 10 },
     ] as CustomNodeObject[],
     links: [
-      { source: '主人公', target: '親友' },
-      { source: '主人公', target: 'ライバル' },
-      { source: '主人公', target: 'ヒロイン' },
-      { source: '謎の組織', target: '主人公' },
-      { source: '謎の組織', target: 'ライバル' },
-    ],
+      {
+        source: '主人公',
+        target: '親友',
+        label: '協力者',
+        type: 'positive',
+        strength: 8,
+      },
+      {
+        source: '主人公',
+        target: 'ライバル',
+        label: '宿敵',
+        type: 'negative',
+        strength: 9,
+      },
+      {
+        source: '主人公',
+        target: 'ヒロイン',
+        label: '恋人',
+        type: 'positive',
+        strength: 10,
+      },
+      {
+        source: '謎の組織',
+        target: '主人公',
+        label: '敵対',
+        type: 'negative',
+        strength: 7,
+      },
+      {
+        source: '謎の組織',
+        target: 'ライバル',
+        label: '利用',
+        type: 'neutral',
+        strength: 5,
+      },
+    ] as CustomLinkObject[],
   };
 
   const handleNodeClick = useCallback((node: NodeObject) => {
@@ -75,7 +113,7 @@ const WorldDetail = () => {
 
     if (node) {
       newHighlightNodes.add(node);
-      fgRef.current?.graphData().links.forEach((link: LinkObject) => {
+      graphData.links.forEach((link) => {
         if (link.source === node || link.target === node) {
           newHighlightLinks.add(link);
           newHighlightNodes.add(link.source as CustomNodeObject);
@@ -101,7 +139,6 @@ const WorldDetail = () => {
 
     const radius = Math.sqrt(customNode.val) * 2;
 
-    // 円の描画
     ctx.beginPath();
     ctx.arc(customNode.x!, customNode.y!, radius, 0, 2 * Math.PI, false);
     ctx.fillStyle =
@@ -112,7 +149,6 @@ const WorldDetail = () => {
         : 'rgba(31, 120, 180, 0.8)';
     ctx.fill();
 
-    // テキストの描画（ハロー効果付き）
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.strokeStyle = 'white';
@@ -120,6 +156,35 @@ const WorldDetail = () => {
     ctx.strokeText(label, customNode.x!, customNode.y!);
     ctx.fillStyle = highlightNodes.size > 0 && !highlightNodes.has(customNode) ? 'rgba(50, 50, 50, 0.6)' : 'black';
     ctx.fillText(label, customNode.x!, customNode.y!);
+  };
+
+  const linkCanvasObject = (
+    link: LinkObject,
+    ctx: CanvasRenderingContext2D,
+    globalScale: number
+  ) => {
+    const customLink = link as CustomLinkObject;
+    const label = customLink.label;
+    const start = customLink.source as CustomNodeObject;
+    const end = customLink.target as CustomNodeObject;
+
+    if (!start?.x || !start?.y || !end?.x || !end?.y) return;
+
+    const textPos = {
+      x: start.x + (end.x - start.x) / 2,
+      y: start.y + (end.y - start.y) / 2,
+    };
+
+    const fontSize = 12 / globalScale;
+    ctx.font = `italic ${fontSize}px Sans-Serif`;
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 3 / globalScale;
+    ctx.strokeText(label, textPos.x, textPos.y);
+    ctx.fillStyle = 'rgba(50, 50, 50, 0.9)';
+    ctx.fillText(label, textPos.x, textPos.y);
   };
 
   return (
@@ -136,17 +201,32 @@ const WorldDetail = () => {
           onNodeClick={handleNodeClick}
           onNodeHover={handleNodeHover}
           nodeCanvasObject={nodeCanvasObject}
-          linkWidth={(link) => (highlightLinks.has(link) ? 2.5 : 1)}
-          linkColor={() => 'rgba(200, 200, 200, 0.6)'}
-          linkDirectionalParticles={1}
-          linkDirectionalParticleWidth={(link) =>
-            highlightLinks.has(link) ? 4 : 0
+          linkCanvasObjectMode={() => 'after'}
+          linkCanvasObject={linkCanvasObject}
+          linkWidth={(link) =>
+            (highlightLinks.has(link as CustomLinkObject) ? 2.5 : 1) *
+            (link as CustomLinkObject).strength / 5
           }
-          linkDirectionalParticleColor={(link: LinkObject) =>
-            highlightNodes.has(link.source as CustomNodeObject) && highlightNodes.has(link.target as CustomNodeObject)
-              ? 'rgb(255,160,122)'
-              : 'rgba(0,0,0,0)'
+          linkColor={(link) => {
+            const customLink = link as CustomLinkObject;
+            if (highlightLinks.has(customLink)) return 'rgb(255,160,122)';
+            switch (customLink.type) {
+              case 'positive':
+                return 'rgba(0, 150, 255, 0.8)';
+              case 'negative':
+                return 'rgba(255, 50, 50, 0.8)';
+              default:
+                return 'rgba(200, 200, 200, 0.6)';
+            }
+          }}
+          linkDirectionalArrowLength={6}
+          linkDirectionalArrowRelPos={1}
+          linkDirectionalParticles={(link) =>
+            highlightLinks.has(link as CustomLinkObject)
+              ? (link as CustomLinkObject).strength
+              : 0
           }
+          linkDirectionalParticleWidth={2}
         />
       )}
     </Box>
