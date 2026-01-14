@@ -2,4 +2,4 @@
 // File Name: index.ts
 // Overview: Re-exports all contexts.
 
-export * from './AuthContext';
+export * from './AuthContext/';

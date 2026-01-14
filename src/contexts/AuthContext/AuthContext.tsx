@@ -17,30 +17,10 @@
  *   これにより、認証ロジックの依存関係が `AuthContext` に集約され、コードの見通しと保守性が向上します。
  */
 
-import React, { createContext } from 'react';
-import type { User } from '@supabase/supabase-js';
+import React from 'react';
 import { useAuthState, useAuthForm } from '@/hooks/useAuth/';
-
-// コンテキストが提供する値の完全な型定義
-interface AuthContextType {
-  // --- from useAuthState ---
-  user: User | null;
-  isInitialLoading: boolean;
-  signOut: () => Promise<void>;
-
-  // --- from useAuthForm ---
-  isSubmitting: boolean;
-  error: string | null;
-  message: string | null;
-  signUp: (email: string, password: string, passwordConfirm: string) => Promise<boolean>;
-  login: (email: string, password: string) => Promise<boolean>;
-  passwordReset: (email: string) => Promise<boolean>;
-  clearError: () => void;
-  clearMessage: () => void;
-}
-
-// コンテキストの作成
-export const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+import type { AuthContextType } from '@/types/auth'; // 型定義が別にある場合
+import { AuthContext } from '@/contexts/AuthContext/AuthContextInstance';
 
 /**
  * アプリケーションに認証機能を提供するProviderコンポーネント。
