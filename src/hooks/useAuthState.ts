@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
+import type { User } from '@supabase/supabase-js';
 
 export interface UseAuthReturn {
   user: User | null;
