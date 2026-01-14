@@ -13,6 +13,8 @@ import {
   MenuItem,
   Box,
   useTheme,
+  Stack,
+  Tooltip,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import type { World } from '@/types/world';
@@ -111,10 +113,58 @@ export const WorldCard: React.FC<WorldCardProps> = ({ world, onDelete }) => {
 
         <Box sx={{ flexGrow: 1 }} />
 
-        <Box sx={{ p: 2, pt: 0 }}>
+        <Box
+          sx={{
+            p: 2,
+            pt: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
           <Typography variant="caption" color="text.secondary">
             作成日: {new Date(world.created_at).toLocaleDateString()}
           </Typography>
+          <Tooltip title="情報の規模: 準備中">
+            <Stack
+              direction="row"
+              spacing={0.5}
+              alignItems="flex-end"
+              sx={{
+                '&:hover .indicator-bar': {
+                  backgroundColor: 'primary.main',
+                },
+              }}
+            >
+              <Box
+                className="indicator-bar"
+                sx={{
+                  width: '4px',
+                  height: '6px',
+                  bgcolor: 'divider',
+                  transition: 'background-color 0.2s',
+                }}
+              />
+              <Box
+                className="indicator-bar"
+                sx={{
+                  width: '4px',
+                  height: '10px',
+                  bgcolor: 'divider',
+                  transition: 'background-color 0.2s',
+                }}
+              />
+              <Box
+                className="indicator-bar"
+                sx={{
+                  width: '4px',
+                  height: '14px',
+                  bgcolor: 'divider',
+                  transition: 'background-color 0.2s',
+                }}
+              />
+            </Stack>
+          </Tooltip>
         </Box>
       </Card>
 
