@@ -3,7 +3,7 @@
 // Overview: The main dashboard page where users can view and manage their worlds.
 
 import { Navigate } from 'react-router-dom';
-import { useAuthContext } from '@/contexts';
+import { useAuth } from '@/hooks';
 import { Box, Paper, Typography, Stack, IconButton, Avatar, Divider } from '@mui/material';
 import GridViewIcon from '@mui/icons-material/GridView';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
@@ -13,7 +13,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import WorldSelector from './WorldSelector';
 
 const Dashboard: React.FC = () => {
-  const { user, signOut } = useAuthContext();
+  const { user, signOut } = useAuth();
 
   // 認証チェック：ロードが終わっていて、かつuserがいない場合
   if (!user) {

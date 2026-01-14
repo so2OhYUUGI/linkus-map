@@ -3,12 +3,12 @@
 // Overview: Defines the layout for authenticated users, including a sidebar and top bar, and handles the loading and authentication state.
 
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuthContext } from '@/contexts';
+import { useAuth } from '@/hooks';
 import { Box } from '@mui/material';
 import { FullscreenLoading } from '@/components/layout';
 
 export const ProtectedRoute = () => {
-  const { user, isInitialLoading } = useAuthContext();
+  const { user, isInitialLoading } = useAuth();
 
   // ✅ 修正：初回ロード時（userがまだいない時）のみ全画面ローディングを表示
   if (isInitialLoading) {

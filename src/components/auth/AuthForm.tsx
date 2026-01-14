@@ -4,16 +4,16 @@
  * [アーキテクチャ設計方針]
  * このコンポーネントは、認証フォームの「ビュー」に責務を特化させています。
  * フォームの見た目と、ユーザー操作（入力、ボタンクリック）のみを扱い、
- * 認証ロジック（API通信、状態管理）はすべて `useAuthContext` を経由して取得します。
+ * 認証ロジック（API通信、状態管理）はすべて `useAuth` を経由して取得します。
  *
  * ◆ 利用規約:
- * ・ 認証関連のロジックは `useAuthContext` フックからのみ取得してください。
+ * ・ 認証関連のロジックは `useAuth` フックからのみ取得してください。
  * ・ `useAuthForm` や `useAuthState` といった下位のフックを直接利用することは禁止です。
  */
 
 import React, { useState, useEffect } from 'react';
 import { Box, Button, TextField, Typography, Link, Alert, Stack, useTheme } from '@mui/material';
-import { useAuthContext } from '@/contexts'; // 集約されたindex.ts経由でインポート
+import { useAuth } from '@/hooks'; // 集約されたindex.ts経由でインポート
 
 type AuthMode = 'login' | 'signup' | 'passwordReset';
 
@@ -34,7 +34,7 @@ const AuthForm: React.FC = () => {
     passwordReset,
     clearError,
     clearMessage,
-  } = useAuthContext();
+  } = useAuth();
 
   // フォームの種類（mode）が切り替わった時に、エラーとメッセージをクリアする
   useEffect(() => {

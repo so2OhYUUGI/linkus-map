@@ -14,7 +14,7 @@
  * ◆ 利用規約:
  * ・ このフックは原則として `AuthContext` の内部でのみ使用してください。
  * ・ ビューコンポーネントが直接このフックを呼び出すことは想定していません。
- *   認証状態へのアクセスは `useAuthContext()` を経由して行うべきです。
+ *   認証状態へのアクセスは `useAuth()` を経由して行うべきです。
  */
 
 import { useState, useEffect, useCallback } from 'react';

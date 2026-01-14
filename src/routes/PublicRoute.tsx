@@ -3,11 +3,11 @@
 // Overview: Defines the routing logic for public pages. It redirects authenticated users to the dashboard unless they are accessing the password update page.
 
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuthContext } from '@/contexts';
+import { useAuth } from '@/hooks';
 import { FullscreenLoading } from '@/components/layout';
 
 export const PublicRoute = () => {
-	const { user, isInitialLoading } = useAuthContext();
+	const { user, isInitialLoading } = useAuth();
 	const location = useLocation();
 
 	if (isInitialLoading) {

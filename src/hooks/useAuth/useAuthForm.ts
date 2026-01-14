@@ -14,7 +14,7 @@
  * ◆ 利用規約:
  * ・ このフックは原則として `AuthContext` の内部でのみ使用してください。
  * ・ ビューコンポーネントが直接このフックを呼び出すことは想定していません。
- *   フォーム操作は `useAuthContext()` を経由して行うべきです。
+ *   フォーム操作は `useAuth()` を経由して行うべきです。
  */
 
 import { useState, useCallback } from 'react';

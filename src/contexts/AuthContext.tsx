@@ -12,12 +12,12 @@
  * ・ AuthProvider: 上記２つのカスタムフックを内部で合成し、単一の Context Value として配下のコンポーネントに提供する。
  *
  * ◆ 利用規約:
- * ・ ビューコンポーネント（.tsxファイル）は、原則としてこの `useAuthContext` フックのみを利用してください。
+ * ・ ビューコンポーネント（.tsxファイル）は、原則としてこの `useAuth` フックのみを利用してください。
  * ・ `useAuthState` や `useAuthForm` をビューコンポーネントから直接呼び出すことは避けてください。
  *   これにより、認証ロジックの依存関係が `AuthContext` に集約され、コードの見通しと保守性が向上します。
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { useAuthState } from '@/hooks/useAuth/useAuthState';
 import { useAuthForm } from '@/hooks/useAuth/useAuthForm';
@@ -28,7 +28,7 @@ interface AuthContextType {
   user: User | null;
   isInitialLoading: boolean;
   signOut: () => Promise<void>;
-  
+
   // --- from useAuthForm ---
   isSubmitting: boolean;
   error: string | null;
@@ -41,7 +41,7 @@ interface AuthContextType {
 }
 
 // コンテキストの作成
-const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+export const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 /**
  * アプリケーションに認証機能を提供するProviderコンポーネント。
@@ -50,7 +50,7 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // グローバルな認証状態（ユーザー情報、ロード状態）を取得
   const { user, isInitialLoading, signOut } = useAuthState();
-  
+
   // フォーム関連のアクションと状態を取得
   const {
     isLoading: isSubmitting, // isSubmitting として名前を変更し、コンテキストの利用者に分かりやすくする
@@ -80,10 +80,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-/**
- * [推奨] 認証関連のすべての状態とアクションにアクセスするための唯一のカスタムフック。
- * ビューコンポーネントは、このフックを通じて認証機能を利用してください。
- */
-// eslint-disable-next-line react-refresh/only-export-components
-export const useAuthContext = () => useContext(AuthContext);
