@@ -16,7 +16,12 @@ import ForceGraph2D, {
 } from 'react-force-graph-2d';
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 
+// Import sample data and types
+import { SAMPLE_WORLD_NOBUNAGA } from '@/constants/sampleDataNobunaga';
+import type { Entity, Connection, ConnectionTag } from '@/types/db';
+
 // カスタムノードとリンクの型定義
+// Note: These interfaces are adapted for the ForceGraph2D library's needs.
 interface CustomNodeObject extends NodeObject {
   id: string;
   name: string;
@@ -32,7 +37,7 @@ interface CustomLinkObject extends LinkObject {
 }
 
 const WorldDetail = () => {
-  const { worldId } = useParams<{ worldId: string }>();
+  const { worldId } = useParams<{ worldId: string }>(); // worldId is not used for now as we use sample data
   const containerRef = useRef<HTMLDivElement>(null);
   const fgRef = useRef<ForceGraphMethods>();
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -49,69 +54,41 @@ const WorldDetail = () => {
     }
   }, []);
 
-  // ダミーデータの拡充
+  // Process sample data for the graph
   const graphData = useMemo(() => {
-    const nodes = [
-      { id: '主人公', name: '主人公', val: 20 },
-      { id: '親友', name: '親友', val: 10 },
-      { id: 'ライバル', name: 'ライバル', val: 10 },
-      { id: '謎の組織', name: '謎の組織', val: 15 },
-      { id: 'ヒロイン', name: 'ヒロイン', val: 10 },
-    ] as CustomNodeObject[];
+    const { entities, connections, connectionTags } = SAMPLE_WORLD_NOBUNAGA;
 
-    const links = [
-      {
-        source: '主人公',
-        target: '親友',
-        label: '協力者',
-        type: 'positive',
-        strength: 8,
-      },
-      {
-        source: '主人公',
-        target: 'ライバル',
-        label: '宿敵',
-        type: 'negative',
-        strength: 9,
-      },
-      // 主人公 -> ヒロイン の多重・双方向リンク
-      {
-        source: '主人公',
-        target: 'ヒロイン',
-        label: '信頼',
-        type: 'positive',
-        strength: 10,
-      },
-      {
-        source: '主人公',
-        target: 'ヒロイン',
-        label: '秘密の共有',
-        type: 'neutral',
-        strength: 6,
-      },
-      {
-        source: 'ヒロイン',
-        target: '主人公',
-        label: '嫉妬',
-        type: 'negative',
-        strength: 4,
-      },
-      // --
-      {
-        source: '謎の組織',
-        target: '主人公',
-        label: '敵対',
-        type: 'negative',
-        strength: 7,
-      },
-      {
-        source: '謎の組織',
-        target: 'ライバル',
-        label: '利用',
-        type: 'neutral',
-        strength: 5,
-      },
-    ] as CustomLinkObject[];
+    const nodes: CustomNodeObject[] = entities.map((entity: Entity) => ({
+      id: entity.id,
+      name: entity.name,
+      val: 10, // Default size value
+    }));
+
+    const tagMap = new Map<string, ConnectionTag>(
+      connectionTags.map((tag) => [tag.id, tag])
+    );
+
+    const getLinkType = (tagText: string): 'positive' | 'negative' | 'neutral' => {
+      if (['敵対', '裏切り', '被害者'].includes(tagText)) {
+        return 'negative';
+      }
+      if (['家族', '同盟', '主君', '配偶者'].includes(tagText)) {
+        return 'positive';
+      }
+      return 'neutral';
+    };
+
+    const links: CustomLinkObject[] = connections.map((conn: Connection) => {
+      const tag = tagMap.get(conn.tag_id);
+      const label = tag?.text || '関係';
+      return {
+        source: conn.from_id,
+        target: conn.to_id,
+        label: label,
+        type: getLinkType(label),
+        strength: 5, // Default strength
+      };
+    });
 
     return { nodes, links };
   }, []);
@@ -146,7 +123,7 @@ const WorldDetail = () => {
     setHighlightLinks(newHighlightLinks);
   };
 
-  const nodeCanvasObject = (
+    const nodeCanvasObject = (
     node: NodeObject,
     ctx: CanvasRenderingContext2D,
     globalScale: number
@@ -189,20 +166,19 @@ const WorldDetail = () => {
 
     if (!start?.x || !start?.y || !end?.x || !end?.y) return;
 
-    // 曲線の制御点を取得（ライブラリ内部計算）
+    // Curve control points
     const controlPoints = (link as any).__controlPoints;
     let textPos;
     if (controlPoints) {
-      // 曲線の中間点を計算
       const [cpX, cpY] = controlPoints;
-      const t = 0.5; // 中間点
+      const t = 0.5; // midpoint
       const invT = 1 - t;
       textPos = {
         x: invT * invT * start.x + 2 * invT * t * cpX + t * t * end.x,
         y: invT * invT * start.y + 2 * invT * t * cpY + t * t * end.y
       };
     } else {
-      // 直線の中間点
+      // Straight line midpoint
       textPos = {
         x: start.x + (end.x - start.x) / 2,
         y: start.y + (end.y - start.y) / 2,
@@ -220,6 +196,7 @@ const WorldDetail = () => {
     ctx.fillStyle = 'rgba(50, 50, 50, 0.9)';
     ctx.fillText(label, textPos.x, textPos.y);
   };
+
 
   return (
     <Box
