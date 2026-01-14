@@ -2,6 +2,6 @@
 // File Name: index.ts
 // Overview: Re-exports all custom hooks from the hooks directory.
 
-export * from './useAuthForm';
-export * from './useAuthState';
+export * from './useAuth/useAuthForm';
+export * from './useAuth/useAuthState';
 export * from './useWorlds';
